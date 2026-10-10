@@ -1,6 +1,6 @@
 # Machine Information
 
-| **Property** | **Value** |
+
 | --- | --- |
 | **IP Address** | 10.129.2.1 |
 | **Operating System** | Linux |
