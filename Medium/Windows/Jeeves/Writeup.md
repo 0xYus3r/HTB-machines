@@ -75,7 +75,7 @@ Navigating to `http://10.10.14.102:50000/askjeeves`, I discovered a Jenkins CI/C
 ![](4.png)
 
 This script console is typically protected by authentication, but in this case, it appeared to be accessible without credentials.
-#### ***Phase 4: Remote Code Execution via Groovy Script***
+### ***Phase 4: Remote Code Execution via Groovy Script***
 
 I crafted a malicious Groovy script that would establish a reverse shell connection back to my attacking machine. The script leverages Java's ProcessBuilder and Socket classes to create an interactive command prompt:
 
