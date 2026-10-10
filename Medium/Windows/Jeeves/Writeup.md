@@ -11,12 +11,10 @@
 | **Release Date**     | November 2017 |
 | **Difficulty**       | Medium        |
 
----
 # Machine Description
 
 Jeeves is a medium-difficulty Windows machine that showcases multiple attack vectors against a system running Jenkins CI/CD server. The exploitation path involves discovering a hidden web application, uploading malicious code to achieve remote code execution, and then leveraging Windows privilege escalation techniques to achieve System-level access. The machine highlights the importance of proper access controls on sensitive services and demonstrates the dangers of overly permissive privilege configurations.
 
----
 # Exploitation Summary
 
 The attack chain involved:
