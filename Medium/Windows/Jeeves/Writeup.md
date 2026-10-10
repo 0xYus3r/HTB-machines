@@ -32,7 +32,7 @@ The attack chain involved:
 
 ## Road to User flag
 
-##### ***Phase 1: Initial Network Reconnaissance and Service Discovery
+#### ***Phase 1: Initial Network Reconnaissance and Service Discovery***
 
 I began by performing a comprehensive network scan to identify all services running on the target machine:
 
@@ -51,7 +51,8 @@ PORT      STATE SERVICE      VERSION
 ```
 
 The presence of a Jetty web server on port 50000 caught my attention, as this is an unusual port for a standard web service. Combined with the standard IIS service on port 80, this suggested a specialized application was running on the non-standard port.
-##### ***Phase 2: Web Service Enumeration***
+
+#### ***Phase 2: Web Service Enumeration***
 
 I investigated the IIS service on port 80 first:
 
@@ -67,14 +68,14 @@ $ gobuster dir -u http://10.10.14.102:50000 -w /usr/share/dirbuster/wordlists/di
 ```
 
 The fuzzing revealed the presence of `/askjeeves`, which appeared to be a Jenkins interface path.
-##### ***Phase 3: Jenkins Discovery and Analysis***
+#### ***Phase 3: Jenkins Discovery and Analysis***
 
 Navigating to `http://10.10.14.102:50000/askjeeves`, I discovered a Jenkins CI/CD server. Jenkins is a popular open-source automation server used for building, testing, and deploying software. The critical finding was that Jenkins had a publicly accessible script console at `/askjeeves/script`, which allowed arbitrary Groovy script execution. 
 
 ![](4.png)
 
 This script console is typically protected by authentication, but in this case, it appeared to be accessible without credentials.
-##### ***Phase 4: Remote Code Execution via Groovy Script***
+#### ***Phase 4: Remote Code Execution via Groovy Script***
 
 I crafted a malicious Groovy script that would establish a reverse shell connection back to my attacking machine. The script leverages Java's ProcessBuilder and Socket classes to create an interactive command prompt:
 
@@ -119,7 +120,7 @@ connect to [10.10.14.102] from (UNKNOWN) [10.10.14.102] 49676
 
 ...SNIP...
 ```
-##### ***Phase 5: Get the flag***
+#### ***Phase 5: Get the flag***
 
 I verified my access and determined the current user context:
 
