@@ -32,7 +32,7 @@ The writeups include the use of common penetration testing tools:
 
 | Difficulty | Linux | Windows | Total |
 |------------|-------|---------|-------|
-| Easy       | 15    | 12      | 27    |
+| Easy       | 2    | 2      | 4    |
 | Medium     | 8     | 6       | 14    |
 | Hard       | 3     | 2       | 5     |
 
