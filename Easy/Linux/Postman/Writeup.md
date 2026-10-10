@@ -1,7 +1,6 @@
 # Machine Information
 
 | IP Address           | 10.129.2.1    |
-| -------------------- | ------------- |
 | **Operating System** | Linux         |
 | **Hostname**         | Postman       |
 | **Domain**           | WORKGROUP     |
