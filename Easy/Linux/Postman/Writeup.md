@@ -225,7 +225,7 @@ Having obtained valid credentials (`Matt: computer2008`), I attempted to authent
 
 ![[Pasted image 20261004131413.png]]
 
-### ***Phase 2: Webmin vulnerable version
+### ***Phase 2: Webmin vulnerable version***
 
 Upon accessing Webmin, I noted the version displayed as 1.910. This version is known to be vulnerable to CVE-2019-12840, a package upload vulnerability that permits remote code execution. The vulnerability exists in the package management module, specifically in the processing of uploaded packages. I configured the Metasploit framework to exploit this vulnerability:
 
