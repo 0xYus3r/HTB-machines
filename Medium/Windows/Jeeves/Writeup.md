@@ -135,7 +135,7 @@ I was executing as the `kohsuke` user, who is the default Jenkins service accoun
 C:\Users\Administrator\.jenkins>type user.txt  
 ```
 
-<span style="background-color: yellow">User flag: e3232272596fb47950d59c4cf1e7066a</span>`e3232272596fb47950d59c4cf1e7066a`
+<mark>User flag: `e3232272596fb47950d59c4cf1e7066a`</mark>
 ## Road to Root flag
 
 ##### ***Phase 1: Privilege Enumeration***
