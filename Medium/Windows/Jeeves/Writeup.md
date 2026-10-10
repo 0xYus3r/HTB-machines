@@ -27,7 +27,6 @@ The attack chain involved:
 6. **Privilege Escalation**: Using JuicyPotato exploit to escalate to SYSTEM privileges
 7. **Flag Extraction**: Retrieving both user and root flags, with the root flag hidden in an NTFS alternate data stream
 
----
 # Detailed Exploitation Steps
 
 ## Road to User flag
