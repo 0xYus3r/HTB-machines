@@ -1,0 +1,228 @@
+{
+  "main": {
+    "id": "f6438cf9988ac92a",
+    "type": "split",
+    "children": [
+      {
+        "id": "67cf2990f3b87085",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1af71b0f2423bebf",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Medium/Windows/Media/Writeup.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Writeup"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c968b0ec03e5e0ba",
+    "type": "split",
+    "children": [
+      {
+        "id": "79739084fd71dffe",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4cc8021ae14c90a1",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Esplora file"
+            }
+          },
+          {
+            "id": "bde073f86504effb",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "pfx",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Ricerca"
+            }
+          },
+          {
+            "id": "dcdf99b8fbcc00d6",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Segnalibri"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "230360b337565a38",
+    "type": "split",
+    "children": [
+      {
+        "id": "c2b4de599ef30ac4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "66768cefe959d8be",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Riferimenti"
+            }
+          },
+          {
+            "id": "b466800974dd2307",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Collegamenti in uscita"
+            }
+          },
+          {
+            "id": "3daf9bbe84cb4c0b",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etichette"
+            }
+          },
+          {
+            "id": "fc0a8f83b81894e2",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Tutte le proprietà"
+            }
+          },
+          {
+            "id": "bd7b84463b23ae61",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Struttura"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Apri selettore rapido": false,
+      "graph:Apri vista grafo": false,
+      "canvas:Crea nuova lavagna": false,
+      "daily-notes:Apri nota giornaliera": false,
+      "templates:Inserisci modello": false,
+      "command-palette:Apri riquadro comandi": false,
+      "bases:Crea nuova Base": false
+    }
+  },
+  "active": "1af71b0f2423bebf",
+  "lastOpenFiles": [
+    "Easy/Windows/Fluffy/Writeup.md",
+    "Medium/Windows/Media/Writeup.md",
+    "Hard/Linux/Snoopy/Senza nome.md",
+    "Medium/Windows/TombWatcher/Writeup.md",
+    "Medium/Windows/Jeeves/Writeup.md",
+    "Easy/Linux/Trick/Writeup.md",
+    "Easy/Linux/Postman/Writeup.md",
+    "Easy/Linux/Postman/Pasted image 20261003093852.png",
+    "Easy/Linux/Postman/Pasted image 20261004131413.png",
+    "Easy/Linux/Postman/Pasted image 20261010090839.png",
+    "Easy/Linux/Postman/Pasted image 20261003093822.png",
+    "Medium/Windows/Media/writeup.md",
+    "Base writeup.md",
+    "Medium/Windows/Administrator/writeup.md",
+    "Medium/Windows/Media/Pasted image 20261009092744.png",
+    "Medium/Windows/Media/Pasted image 20261009080622.png",
+    "Medium/Windows/Media/Pasted image 20261008111641.png",
+    "Medium/Windows/Media/Pasted image 20261008110143.png",
+    "Medium/Windows/Media/Pasted image 20261008105628.png",
+    "Medium/Windows/Media/Pasted image 20261007161508.png",
+    "Medium/Windows/Media",
+    "Medium/Windows/TombWatcher/writeup.md",
+    "Medium/Windows/Administrator",
+    "Medium/Windows/TombWatcher",
+    "Medium/Windows/Pov/writeup.md",
+    "Medium/Windows/Pov",
+    "Easy/Linux/Postman/writeup.md",
+    "Easy/Linux/Postman",
+    "Hard/Linux/Snoopy",
+    "Hard/Linux",
+    "Easy/Linux/Trick",
+    "Medium/Windows/Jeeves/WriteUp.md",
+    "Medium/Windows/Jeeves/Base writeup.zip",
+    "Medium/Windows/Jeeves/Base writeup.md",
+    "Medium/Windows/Jeeves/WriteUp.zip",
+    "Easy/Fluffy/WriteUp.md",
+    "Benvenuto.md"
+  ]
+}
