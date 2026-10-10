@@ -33,7 +33,7 @@ The attack chain involved:
 
 ## Road to User Flag
 
-#### ***Phase 1: Initial Network Reconnaissance and Service Discovery***
+### ***Phase 1: Initial Network Reconnaissance and Service Discovery***
 
 I began by scanning the target machine with Nmap to identify open ports and running services:
 
