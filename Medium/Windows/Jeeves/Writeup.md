@@ -71,7 +71,7 @@ The fuzzing revealed the presence of `/askjeeves`, which appeared to be a Jenkin
 
 Navigating to `http://10.10.14.102:50000/askjeeves`, I discovered a Jenkins CI/CD server. Jenkins is a popular open-source automation server used for building, testing, and deploying software. The critical finding was that Jenkins had a publicly accessible script console at `/askjeeves/script`, which allowed arbitrary Groovy script execution. 
 
-![[Pasted image 20260930104242.png]]
+![](4.png)
 
 This script console is typically protected by authentication, but in this case, it appeared to be accessible without credentials.
 ##### ***Phase 4: Remote Code Execution via Groovy Script***
