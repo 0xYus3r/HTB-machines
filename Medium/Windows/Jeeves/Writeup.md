@@ -106,7 +106,11 @@ I set up a netcat listener on my attacking machine:
 $ nc -lvnp 8888
 ```
 
-I submitted the malicious Groovy script through the Jenkins script console interface at `/askjeeves/script`. Upon execution, the script successfully established a reverse shell connection:
+I submitted the malicious Groovy script through the Jenkins script console interface at `/askjeeves/script`. 
+
+![](1.png)
+
+Upon execution, the script successfully established a reverse shell connection:
 
 ```
 ...SNIP...
