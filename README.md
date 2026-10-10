@@ -1,4 +1,8 @@
 
+## 📝 Personal Notes
+
+This repository is maintained as part of my personal learning journey in cybersecurity. Each writeup represents a challenge overcome and an opportunity for professional growth.
+
 ## 🎯 Objective
 
 This repository aims to:
@@ -17,10 +21,6 @@ Each writeup follows a standard structure:
 4. **Privilege Escalation**: Escalating to administrative rights
 5. **Post-Exploitation**: Post-compromise analysis
 6. **Flag Capture**: Capturing User and Root flags
-
-## 📝 Personal Notes
-
-This repository is maintained as part of my personal learning journey in cybersecurity. Each writeup represents a challenge overcome and an opportunity for professional growth.
 
 ## 📊 Statistics
 
