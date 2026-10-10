@@ -9,6 +9,33 @@
 | **Release Date** | November 2019 |
 | **Difficulty** | Easy |
 
+<table>
+<tr>
+<td><strong>IP Address</strong></td>
+<td>10.129.2.1</td>
+</tr>
+<tr>
+<td><strong>Operating System</strong></td>
+<td>Linux</td>
+</tr>
+<tr>
+<td><strong>Hostname</strong></td>
+<td>Postman</td>
+</tr>
+<tr>
+<td><strong>Domain</strong></td>
+<td>WORKGROUP</td>
+</tr>
+<tr>
+<td><strong>Release Date</strong></td>
+<td>November 2019</td>
+</tr>
+<tr>
+<td><strong>Difficulty</strong></td>
+<td>Easy</td>
+</tr>
+</table>
+
 # Machine Description
 
 Postman is an Easy-level Linux machine that demonstrates the risks of insecure default configurations in popular services. The machine features an open Redis instance with anonymous access, an outdated Webmin installation vulnerable to authenticated remote code execution, and weak credential management practices. The exploitation chain progresses from leveraging Redis to inject SSH keys, cracking encrypted private keys, and finally exploiting a known vulnerability in Webmin to achieve root access.
