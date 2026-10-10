@@ -161,7 +161,7 @@ SeTimeZonePrivilege           Change the time zone                      Disabled
 ```
 
 The Critical Finding was the `SeImpersonate` privilege was enabled. This privilege allows a process to impersonate another user after authentication. While this privilege is commonly held by service accounts, it can be exploited using techniques like token impersonation if combined with a suitable exploit.
-##### ***Phase 2: JuicyPotato Exploitation***
+### ***Phase 2: JuicyPotato Exploitation***
 
 The `SeImpersonate` privilege, combined with running as a service account in a Windows 10 environment, makes the system vulnerable to the `JuicyPotato` exploit. `JuicyPotato` is a local privilege escalation tool that works by exploiting the Windows COM marshalling behavior to impersonate a SYSTEM-level token. I started a web server on my attacking machine and downloaded on the compromised machine `JuicyPotato` and the Windows version of `Netcat`:
 
