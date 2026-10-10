@@ -139,7 +139,7 @@ C:\Users\Administrator\.jenkins>type user.txt
 
 ## Road to Root flag
 
-##### ***Phase 1: Privilege Enumeration***
+### ***Phase 1: Privilege Enumeration***
 
 To plan my privilege escalation strategy, I enumerated the privileges assigned to the current user:
 
@@ -194,7 +194,7 @@ Testing {4991d34b-80a1-4291-83b6-3328366b9097} 53000
 ```
 
 JuicyPotato works by setting up a local server that simulates a COM service on a specified port, then forces a legitimate, high-privileged COM service running as SYSTEM to connect to it. When the authentic COM service initiates the connection, its SYSTEM security token is passed directly to the fake JuicyPotato server. By using the `-t *` option, JuicyPotato captures this token and passes it to the `CreateProcessWithTokenW` API call. This allows it to spawn a new process (such as cmd.exe) by impersonating the highly privileged `SYSTEM` account. As we can see, the exploit executed successfully.
-##### ***Phase 3: System-Level Access***
+### ***Phase 3: System-Level Access***
 
 The JuicyPotato exploit successfully impersonated a `SYSTEM` token and executed my reverse shell command. On my listener, I received a connection with `SYSTEM` privileges:
 
@@ -203,7 +203,7 @@ C:\Windows\system32>whoami
 whoami  
 nt authority\system
 ```
-##### ***Phase 4: Get the flag***
+### ***Phase 4: Get the flag***
 
 With SYSTEM privileges, I navigated to the `Administrator`'s Desktop directory to try to retrieve the root flag:
 
@@ -228,17 +228,14 @@ C:\Windows\system32>dir /r C:\Users\Administrator\Desktop
 more < hm.txt:root.txt
 ```
 
-==Root flag==: `afbc5bd4b615a60648cec41c6ac92530`
+<mark>Root flag</mark>: `afbc5bd4b615a60648cec41c6ac92530`
 
----
 # Key Vulnerabilities Exploited
 
 - **Unauthenticated Jenkins Script Console**: The script console at `/askjeeves/script` was publicly accessible without authentication, allowing arbitrary code execution
 - **SeImpersonate Privilege**: The Jenkins service account possessed the `SeImpersonate` privilege, a known precursor to privilege escalation
 - **Unpatched Windows 10**: The machine was vulnerable to the JuicyPotato exploit due to unpatched COM marshalling behavior
 - **Inadequate Access Controls**: The Jenkins installation was running with minimal security configuration
-
----
 
 # Conclusion
 
