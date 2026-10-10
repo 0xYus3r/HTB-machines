@@ -59,8 +59,7 @@ I investigated the IIS service on port 80 first:
 
 When i searched for something like "test" or anything else, the response was an image to similute a DMBS response and not a real web page:
 
-![[Pasted image 20260930103237.png]]
-
+![](3.png)
 So, the service was not vulnerable to SQLi. More importantly, I needed to focus on the Jetty service running on port 50000. I performed directory fuzzing on the Jetty service to discover hidden paths:
 
 ```
