@@ -218,7 +218,6 @@ $ cat user.txt
 
 ==User flag==: `68b91ffdff6653db7e17c1e941570cb5`
 
----
 ## Road to Root Flag
 
 ##### ***Phase 1: User Enumeration and Privilege Assessment***
