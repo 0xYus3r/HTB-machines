@@ -1,4 +1,4 @@
-<!-- toc is disabled -->
+[toc]: # "Table of Contents"
 
 
 # Machine Information
