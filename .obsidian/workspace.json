@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Medium/Linux/Readme.md",
+                "file": "Easy/Windows/Temp/Readme.md",
                 "mode": "source",
                 "source": false
               },
@@ -185,10 +185,12 @@
       "bases:Crea nuova Base": false
     }
   },
-  "active": "1af71b0f2423bebf",
+  "active": "4cc8021ae14c90a1",
   "lastOpenFiles": [
-    "Hard/Readme.md",
     "Medium/Linux/Readme.md",
+    "Easy/Windows/Temp/Readme.md",
+    "Easy/Windows/Temp",
+    "Hard/Readme.md",
     "Medium/Windows/Media/Writeup.md",
     "Easy/Windows/Fluffy/Writeup.md",
     "Hard/Linux/Snoopy/Senza nome.md",
@@ -223,7 +225,6 @@
     "Medium/Windows/Jeeves/WriteUp.md",
     "Medium/Windows/Jeeves/Base writeup.zip",
     "Medium/Windows/Jeeves/Base writeup.md",
-    "Medium/Windows/Jeeves/WriteUp.zip",
     "Easy/Fluffy/WriteUp.md",
     "Benvenuto.md"
   ]
