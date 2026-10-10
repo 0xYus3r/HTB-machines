@@ -55,7 +55,7 @@ The presence of a Jetty web server on port 50000 caught my attention, as this is
 
 I investigated the IIS service on port 80 first:
 
-![[](./2.png)
+![](./2.png)
 
 When i searched for something like "test" or anything else, the response was an image to similute a DMBS response and not a real web page:
 
