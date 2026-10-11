@@ -84,7 +84,7 @@ trick.htb.              604800  IN      SOA     trick.htb
 ```
 
 The zone transfer was successful and revealed a `CNAME` record pointing to a new subdomain: `preprod-payroll.trick.htb`, which resolved to the primary domain. This discovery indicated the presence of virtual hosts on the web server.
-##### ***Phase 2: Web Application Enumeration and SQL Injection Discovery***
+### ***Phase 2: Web Application Enumeration and SQL Injection Discovery***
 
 I accessed the `preprod-payroll.trick.htb` subdomain and discovered a login form. 
 
