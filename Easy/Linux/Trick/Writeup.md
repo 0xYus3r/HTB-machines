@@ -32,7 +32,6 @@
 
 Trick is an Easy-level Linux machine that focuses on web vulnerabilities and privilege escalation through misconfigured services. The machine features a payroll web application vulnerable to SQL injection, an additional marketing site with local file inclusion, and a privilege escalation vector through the Fail2Ban service running with root privileges.
 
----
 
 # Exploitation Summary
 
@@ -44,7 +43,6 @@ The attack chain involved:
 4. **SSH Access**: Gaining shell access as the michael user
 5. **Privilege Escalation**: Leveraging sudo permissions combined with insecure Fail2Ban configuration to achieve root access
 
----
 
 # Detailed Walkthrough
 
@@ -90,11 +88,11 @@ The zone transfer was successful and revealed a `CNAME` record pointing to a new
 
 I accessed the `preprod-payroll.trick.htb` subdomain and discovered a login form. 
 
-![[Pasted image 20260930123944.png]]
+![](1.png)
 
 After intercepting the login request with Burp Suite, I identified two POST parameters: `username` and `password`. 
 
-![[Pasted image 20260930124007.png]]
+![](2.png)
 
 I pasted the request in `req.txt` file and passed it to SQLMap to test the login form for SQL injection vulnerabilities:
 
