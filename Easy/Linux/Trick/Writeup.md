@@ -231,7 +231,7 @@ After logging in, I navigated to `michael`'s home directory and retrieved the us
 $ cat user.txt
 ```
 
-==User flag==: `68b91ffdff6653db7e17c1e941570cb5`
+<mark>User flag</mark>: `68b91ffdff6653db7e17c1e941570cb5`
 
 ## Road to Root Flag
 
@@ -401,9 +401,9 @@ I navigated to the `root` home directory and retrieved the root flag:
 bash-5.0# cat /root/root.txt
 ```
 
-==Root flag==: `67412bcf93616d5f9f3a67deab2e452c`
+<mark>Root flag</mark>: `67412bcf93616d5f9f3a67deab2e452c`
 
----
+
 ## Key Vulnerabilities Exploited
 
 - **SQL Injection in Login Form**: The payroll application failed to properly sanitize user input in the login form, allowing attackers to inject SQL commands through the username parameter. Multiple injection techniques (error-based, boolean-based, and time-based blind) were possible, enabling comprehensive database enumeration.
@@ -412,7 +412,6 @@ bash-5.0# cat /root/root.txt
 - **Insecure Fail2Ban Configuration**: The fail2ban action.d directory was configured with group write permissions, allowing members of the security group to create and modify action configuration files. Combined with michael's sudo privileges to restart the service, this created a privilege escalation pathway.
 - **Unprotected SUID Modification**: Bash's default behavior of allowing SUID bit modification through standard file permission commands enabled the creation of a privileged bash shell that maintains root privileges even when executed by regular users.
 
----
 
 ## Conclusion
 
