@@ -1,13 +1,32 @@
 
 # Machine Information
 
-| **IP Address**       | 10.129.232.88 |
-| -------------------- | ------------- |
-| **Operating System** | Windows       |
-| **Hostname**         | DC01          |
-| **Domain**           | fluffy.htb    |
-| **Release Date**     | 24 May, 2025  |
-| **Difficulty**       | Easy          |
+<table>
+<tr>
+<td><strong>IP Address</strong></td>
+<td>10.129.232.88</td>
+</tr>
+<tr>
+<td><strong>Operating System</strong></td>
+<td>Windows</td>
+</tr>
+<tr>
+<td><strong>Hostname</strong></td>
+<td>DC01</td>
+</tr>
+<tr>
+<td><strong>Domain</strong></td>
+<td>fluffy.htb</td>
+</tr>
+<tr>
+<td><strong>Release Date</strong></td>
+<td>May 20251</td>
+</tr>
+<tr>
+<td><strong>Difficulty</strong></td>
+<td>Easy</td>
+</tr>
+</table>
 
 
 # Machine Description
