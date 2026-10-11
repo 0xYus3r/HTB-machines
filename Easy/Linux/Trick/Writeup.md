@@ -132,7 +132,7 @@ bnFz&password=test
 ```
 
 Error-based and boolean-based techniques were significantly faster than time-based injection.
-##### ***Phase 3: Database Enumeration and System File Extraction***
+### ***Phase 3: Database Enumeration and System File Extraction***
 
 Using SQLMap, I enumerated the current database user:
 
@@ -196,11 +196,11 @@ server {
 ```
 
 The configuration revealed the virtual hosts `preprod-marketing.trick.htb`, which processes PHP requests through a dedicated FPM socket for the `michael` user (`php7.3-fpm-michael.sock`). This makes preprod-marketing vhost particularly interesting as it ran PHP processes with `michael`'s privileges.
-##### ***Phase 4: Local File Inclusion and SSH Key Extraction***
+### ***Phase 4: Local File Inclusion and SSH Key Extraction***
 
 I initially attempted to retrieve `michael`'s SSH private key directly through SQLMap, but this approach failed. I then discovered that the `preprod-marketing.trick.htb` site contained a parameter named `page` that appeared to be processing file inputs. 
 
-![[Pasted image 20260930224532.png]]
+![](3.png)
 
 To identify a working LFI payload, I used ffuf to fuzz the `page` parameter against a comprehensive LFI wordlist:
 
@@ -210,7 +210,7 @@ $ ffuf -w ~/Tools/SecLists/Fuzzing/LFI/LFI-Jhaddix.txt:FUZZ -u http://preprod-ma
 
 The fuzzing discovered that the payload `....//....//....//....//etc/passwd` successfully bypassed the application's input filtering, indicating a path traversal vulnerability with directory traversal filters. Using this payload, I intercepted a request in Burp Suite and modified it to retrieve `michael`'s SSH private key:
 
-![[Pasted image 20260930224736.png]]
+![](4.png)
 
 The private key was successfully extracted. I saved it locally and adjusted the permissions:
 
@@ -235,7 +235,7 @@ $ cat user.txt
 
 ## Road to Root Flag
 
-##### ***Phase 1: User Enumeration and Privilege Assessment***
+### ***Phase 1: User Enumeration and Privilege Assessment***
 
 With shell access as `michael`, I began the privilege escalation process by checking the user's group memberships:
 
@@ -257,7 +257,7 @@ $ sudo -l
 ```
 
 The output revealed that michael can restart the Fail2ban program as `root` without entering a password.
-##### ***Phase 2: Understanding Fail2Ban and Its Vulnerabilities***
+### ***Phase 2: Understanding Fail2Ban and Its Vulnerabilities***
 
 Fail2Ban is a security tool designed to mitigate brute force attacks by monitoring authentication log files. When excessive failed login attempts are detected from a particular IP address, Fail2Ban automatically updates the system's firewall rules to block further connections from that address for a specified duration. The default configuration bans an IP after five failed authentication attempts within a ten-minute window, and maintains the ban for ten minutes. The key components that make Fail2Ban a potential attack surface are its configuration files and action scripts. Several configuration files control Fail2Ban's behavior:
 
@@ -295,7 +295,7 @@ enabled = true
 ```
 
 Only the SSH service jail was enabled by default.
-##### ***Phase 3: Identifying Write Permissions on Action Files***
+### ***Phase 3: Identifying Write Permissions on Action Files***
 
 The critical vulnerability lay in the file permissions of the action directory. I checked the directory ownership:
 
@@ -324,7 +324,7 @@ $ ls -la /etc/fail2ban/action.d/iptables-multiport.conf
 
 While `michael` could not directly modify existing action files, he retained the ability to create new configuration files within the directory, or overwrite them if they had different permissions.
 
-##### ***Phase 4: Crafting the Privilege Escalation Payload***
+### ***Phase 4: Crafting the Privilege Escalation Payload***
 
 I copied the `iptables-multiport.conf` file to `michael`'s home directory to examine its structure. It contained the following:
 
@@ -357,7 +357,7 @@ cp ~/iptables-multiport.conf /etc/fail2ban/action.d/iptables-multiport.conf
 
 The system prompted for confirmation to overwrite the existing file, which I accepted.
 
-##### ***Phase 5: Triggering the Fail2Ban Exploit***
+### ***Phase 5: Triggering the Fail2Ban Exploit***
 
 To activate the malicious action, I needed to trigger the SSH jail by exceeding the maximum failed login attempts. Using the sudo privilege, I restarted Fail2Ban to load the modified configuration:
 
@@ -373,7 +373,7 @@ hydra -l michael -P /usr/share/wordlists/rockyou.txt ssh://10.129.227.180
 
 After exceeding five failed attempts within the timeout window, the SSH jail triggered, and Fail2Ban executed the action defined in the modified iptables-multiport.conf file. This resulted in the execution of `chmod +s /bin/bash` with root privileges.
 
-##### ***Phase 6: Privilege Verification and Root Flag Retrieval***
+### ***Phase 6: Privilege Verification and Root Flag Retrieval***
 
 I returned to the SSH session and verified that the `SUID` bit had been successfully set on bash:
 
