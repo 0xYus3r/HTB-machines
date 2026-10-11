@@ -31,7 +31,7 @@ The attack chain involved:
 
 ## Road to User flag
 
-### ***Phase 1: Initial Network Reconnaissance and Service Discovery
+### ***Phase 1: Initial Network Reconnaissance and Service Discovery***
 
 I began by performing a comprehensive Nmap scan to identify open ports and services running on the target:
 
