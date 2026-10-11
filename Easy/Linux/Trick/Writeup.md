@@ -1,15 +1,32 @@
 
 # Machine Information
 
-| **IP Address**       | 10.129.227.180 |
-| -------------------- | -------------- |
-| **Operating System** | Linux          |
-| **Hostname**         | TRICK          |
-| **Domain**           | trick.htb      |
-| **Release Date**     | September 2021 |
-| **Difficulty**       | Easy           |
-
----
+<table>
+<tr>
+<td><strong>IP Address</strong></td>
+<td>10.129.227.180</td>
+</tr>
+<tr>
+<td><strong>Operating System</strong></td>
+<td>Linux</td>
+</tr>
+<tr>
+<td><strong>Hostname</strong></td>
+<td>TRICK</td>
+</tr>
+<tr>
+<td><strong>Domain</strong></td>
+<td>trick.htb</td>
+</tr>
+<tr>
+<td><strong>Release Date</strong></td>
+<td>September 2021</td>
+</tr>
+<tr>
+<td><strong>Difficulty</strong></td>
+<td>Easy</td>
+</tr>
+</table>
 
 # Machine Description
 
