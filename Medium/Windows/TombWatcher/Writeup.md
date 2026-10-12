@@ -1,14 +1,6 @@
 
 # Machine Information
 
-| **IP Address**       | 10.129.101.78   |
-| -------------------- | --------------- |
-| **Operating System** | Windows         |
-| **Hostname**         | DC              |
-| **Domain**           | tombwatcher.htb |
-| **Release Date**     | June 2025       |
-| **Difficulty**       | Medium          |
-
 <table>
 <tr>
 <td><strong>IP Address</strong></td>
