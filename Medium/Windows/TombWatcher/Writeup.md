@@ -221,7 +221,11 @@ SMB         10.129.101.78   445    DC01             [+]
 
 ### ***Phase 9: FullControl via Owner Modification***
 
-The `sam` user possessed the `WriteOwner` privilege on the `john` user account. This permission allowed `sam` to become the owner of `john`'s user object. The `owneredit.py` tool from Impacket was used to modify the owner:
+The `sam` user possessed the `WriteOwner` privilege on the `john` user account. 
+
+![](5.png)
+
+This permission allowed `sam` to become the owner of `john`'s user object. The `owneredit.py` tool from Impacket was used to modify the owner:
 
 ```
 $ python3 ./owneredit.py -action write -new-owner 'sam' -target 'john' 'tombwatcher.htb/sam:pass'
@@ -245,7 +249,11 @@ $ net rpc password "john" "pass1" -U "tombwatcher.htb/sam" % "pass" -S "DC01.tom
 
 ### ***Phase 11: Get the flag***
 
-The `john` user was a member of the `Remote Management Users` group, which granted access to the machine via Windows Remote Management (WinRM). Using `evil-winrm` with `john`'s new credentials, a remote shell was established:
+The `john` user was a member of the `Remote Management Users` group, which granted access to the machine via Windows Remote Management (WinRM). 
+
+![](6.png)
+
+Using `evil-winrm` with `john`'s new credentials, a remote shell was established:
 
 ```
 $ evil-winrm -i 10.129.101.78 -u john -p pass1
