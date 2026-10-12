@@ -3,13 +3,32 @@
 
 # Machine Information
 
-| **IP Address**       | 10.10.14.102  |
-| -------------------- | ------------- |
-| **Operating System** | Windows       |
-| **Hostname**         | JEEVES        |
-| **Domain**           | Workgroup     |
-| **Release Date**     | November 2017 |
-| **Difficulty**       | Medium        |
+<table>
+<tr>
+<td><strong>IP Address</strong></td>
+<td>10.10.14.102</td>
+</tr>
+<tr>
+<td><strong>Operating System</strong></td>
+<td>Windows</td>
+</tr>
+<tr>
+<td><strong>Hostname</strong></td>
+<td>JEEVES</td>
+</tr>
+<tr>
+<td><strong>Domain</strong></td>
+<td>Workgroup</td>
+</tr>
+<tr>
+<td><strong>Release Date</strong></td>
+<td>November 2017</td>
+</tr>
+<tr>
+<td><strong>Difficulty</strong></td>
+<td>Medium</td>
+</tr>
+</table>
 
 # Machine Description
 
