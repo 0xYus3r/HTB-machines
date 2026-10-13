@@ -96,7 +96,7 @@ IT/
 
 I retrieved the `Upgrade_Notice.pdf` file which contained critical information about a scheduled system upgrade to patch some discovered vulnerabilities.
 
-![](1.png)
+![](HTB-machines/Easy/Windows/Fluffy/1.png)
 
 ### ***Phase 3: CVE-2025-24071 Exploitation***
 
@@ -157,7 +157,7 @@ $ python3 ~/Tools/BloodHound.py/bloodhound.py -d fluffy.htb -c all -u p.agila -p
 
 After collecting all the domain data, I uploaded them via BloodHound GUI, searched for Transitive Object Control for the user `p.agila`, and discovered several useful informations:
 
-![](2.png)
+![](HTB-machines/Easy/Windows/Fluffy/2.png)
 
 From this, we can see a clear attack path:
 - User `p.agila` had `GenericWrite` over the `SERVICE ACCOUNTS` group

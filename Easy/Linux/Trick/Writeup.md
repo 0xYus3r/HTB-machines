@@ -88,11 +88,11 @@ The zone transfer was successful and revealed a `CNAME` record pointing to a new
 
 I accessed the `preprod-payroll.trick.htb` subdomain and discovered a login form. 
 
-![](1.png)
+![](HTB-machines/Easy/Linux/Trick/1.png)
 
 After intercepting the login request with Burp Suite, I identified two POST parameters: `username` and `password`. 
 
-![](2.png)
+![](HTB-machines/Easy/Linux/Trick/2.png)
 
 I pasted the request in `req.txt` file and passed it to SQLMap to test the login form for SQL injection vulnerabilities:
 
@@ -200,7 +200,7 @@ The configuration revealed the virtual hosts `preprod-marketing.trick.htb`, whic
 
 I initially attempted to retrieve `michael`'s SSH private key directly through SQLMap, but this approach failed. I then discovered that the `preprod-marketing.trick.htb` site contained a parameter named `page` that appeared to be processing file inputs. 
 
-![](3.png)
+![](HTB-machines/Easy/Linux/Trick/3.png)
 
 To identify a working LFI payload, I used ffuf to fuzz the `page` parameter against a comprehensive LFI wordlist:
 
@@ -210,7 +210,7 @@ $ ffuf -w ~/Tools/SecLists/Fuzzing/LFI/LFI-Jhaddix.txt:FUZZ -u http://preprod-ma
 
 The fuzzing discovered that the payload `....//....//....//....//etc/passwd` successfully bypassed the application's input filtering, indicating a path traversal vulnerability with directory traversal filters. Using this payload, I intercepted a request in Burp Suite and modified it to retrieve `michael`'s SSH private key:
 
-![](4.png)
+![](HTB-machines/Easy/Linux/Trick/4.png)
 
 The private key was successfully extracted. I saved it locally and adjusted the permissions:
 

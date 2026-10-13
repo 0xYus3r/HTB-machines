@@ -78,7 +78,7 @@ I investigated the IIS service on port 80 first:
 
 When i searched for something like "test" or anything else, the response was an image to similute a DMBS response and not a real web page:
 
-![](3.png)
+![](HTB-machines/Medium/Windows/Jeeves/3.png)
 
 So, the service was not vulnerable to SQLi. More importantly, I needed to focus on the Jetty service running on port 50000. I performed directory fuzzing on the Jetty service to discover hidden paths:
 
@@ -91,7 +91,7 @@ The fuzzing revealed the presence of `/askjeeves`, which appeared to be a Jenkin
 
 Navigating to `http://10.10.14.102:50000/askjeeves`, I discovered a Jenkins CI/CD server. Jenkins is a popular open-source automation server used for building, testing, and deploying software. The critical finding was that Jenkins had a publicly accessible script console at `/askjeeves/script`, which allowed arbitrary Groovy script execution. 
 
-![](4.png)
+![](HTB-machines/Medium/Windows/Jeeves/4.png)
 
 This script console is typically protected by authentication, but in this case, it appeared to be accessible without credentials.
 ### ***Phase 4: Remote Code Execution via Groovy Script***
@@ -128,7 +128,7 @@ $ nc -lvnp 8888
 
 I submitted the malicious Groovy script through the Jenkins script console interface at `/askjeeves/script`. 
 
-![](1.png)
+![](HTB-machines/Medium/Windows/Jeeves/1.png)
 
 Upon execution, the script successfully established a reverse shell connection:
 

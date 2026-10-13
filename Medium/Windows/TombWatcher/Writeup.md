@@ -97,7 +97,7 @@ $ sudo python3 ~/Tools/BloodHound.py/bloodhound.py -d tombwatcher.htb -c all -u 
 
 Subsequently, i uploaded the zip file on BloodHound GUI. The BloodHound analysis revealed that the user henry possessed the `WriteSPN` privilege on the user `alfred`. 
 
-![](1.png)
+![](HTB-machines/Medium/Windows/TombWatcher/1.png)
 
 This permission would allow modification of `alfred`'s Service Principal Name (SPN) attribute, enabling a Kerberoasting attack.
 
@@ -151,7 +151,7 @@ With `alfred`'s credentials now compromised (`alfred:basketball`), the attacker 
 
 The BloodHound analysis revealed that `alfred` possessed the `AddSelf` privilege on the `Infrastructure` group. This permission allowed `alfred` to add himself to the group. 
 
-![](2.png)
+![](HTB-machines/Medium/Windows/TombWatcher/2.png)
 
 Using the bloodyad tool with `alfred`'s credentials, the user was successfully added to the `Infrastructure` group.
 
@@ -183,7 +183,7 @@ The `Infrastructure` group membership would prove critical in the next phase of 
 
 The `Infrastructure` group possessed permissions to read the managed password for the `ansible_dev$` Group Managed Service Account (GMSA). 
 
-![](3.png)
+![](HTB-machines/Medium/Windows/TombWatcher/3.png)
 
 GMSAs are special Active Directory objects where the password is automatically managed and rotated by domain controllers. The intended use of a GMSA is to allow certain computer accounts to retrieve the password for the GMSA, then run local services as the GMSA. Any principal listed in the "Managed Password Read" permissions can retrieve the current password for that service account. The `gMSADumper.py` tool was executed to extract the NT hash for the `ansible_dev$` account:
 
@@ -201,7 +201,7 @@ ansible_dev$:::3eca34dd13a85db79c03178b7b149621
 
 The next escalation step involved exploiting a chain of ACL permissions. The `ansible_dev$` account possessed the `ForceChangePassword` privilege on the `sam` user account. 
 
-![](4.png)
+![](HTB-machines/Medium/Windows/TombWatcher/4.png)
 
 Using the Pass-the-Hash technique with the extracted `ansible_dev$` NT hash, the attacker changed `sam`'s password.
 
@@ -223,7 +223,7 @@ SMB         10.129.101.78   445    DC01             [+]
 
 The `sam` user possessed the `WriteOwner` privilege on the `john` user account. 
 
-![](5.png)
+![](HTB-machines/Medium/Windows/TombWatcher/5.png)
 
 This permission allowed `sam` to become the owner of `john`'s user object. The `owneredit.py` tool from Impacket was used to modify the owner:
 
@@ -251,7 +251,7 @@ $ net rpc password "john" "pass1" -U "tombwatcher.htb/sam" % "pass" -S "DC01.tom
 
 The `john` user was a member of the `Remote Management Users` group, which granted access to the machine via Windows Remote Management (WinRM). 
 
-![](6.png)
+![](HTB-machines/Medium/Windows/TombWatcher/6.png)
 
 Using `evil-winrm` with `john`'s new credentials, a remote shell was established:
 
@@ -271,7 +271,11 @@ The user flag was successfully retrieved from john's Desktop directory:
 
 ### ***Phase 1: AD CS Enumeration and Template Discovery***
 
-Following the acquisition of user-level access through `john`'s account, the focus shifted to privilege escalation toward domain administrator. The `john` user possessed the `GenericAll` permission on the `ADCS` organizational unit (OU), which contained certificate service configurations. Initial enumeration of the `ADCS` container revealed it was empty of objects. The `certipy-ad` tool was used to perform a comprehensive enumeration of the Active Directory Certificate Services infrastructure:
+Following the acquisition of user-level access through `john`'s account, the focus shifted to privilege escalation toward domain administrator. The `john` user possessed the `GenericAll` permission on the `ADCS` organizational unit (OU), which contained certificate service configurations. 
+
+![](7.png)
+
+Initial enumeration of the `ADCS` container revealed it was empty of objects. The `certipy-ad` tool was used to perform a comprehensive enumeration of the Active Directory Certificate Services infrastructure:
 
 ```
 $ certipy-ad find -u john -p pass1 -dc-ip 10.129.101.78

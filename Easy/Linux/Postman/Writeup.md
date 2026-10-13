@@ -81,11 +81,11 @@ $ nmap 10.129.2.1 -Pn -p- --open -T5
 
 I accessed the Webmin interface on port 10000 and discovered a login form requiring username and password credentials. 
 
-![](1.png)
+![](HTB-machines/Easy/Linux/Postman/1.png)
 
 After intercepting the login request with Burp Suite, I identified POST parameters for both username and password fields. 
 
-![](2.png)
+![](HTB-machines/Easy/Linux/Postman/2.png)
 
 Suspecting potential SQL injection vulnerabilities, I saved the request as a text file and tested the login form using SQLMap:
 
@@ -242,7 +242,7 @@ Matt@Postman:~$ cat /home/Matt/user.txt
 
 Having obtained valid credentials (`Matt: computer2008`), I attempted to authenticate to the Webmin interface on port 10000. Webmin presented a login form, and I entered the discovered credentials. The authentication succeeded, granting me access to the Webmin administrative dashboard. This represented a significant privilege escalation opportunity, as Webmin runs with elevated privileges and interacts directly with system configuration.
 
-![](3.png)
+![](HTB-machines/Easy/Linux/Postman/3.png)
 
 ### ***Phase 2: Webmin vulnerable version***
 
