@@ -27,7 +27,7 @@ Each writeup follows a standard structure:
 | Difficulty | Linux | Windows | Total |
 |------------|-------|---------|-------|
 | Easy       | 2    | 2      | 4    |
-| Medium     | 0     | 3       | 3    |
+| Medium     | 0     | 4       | 4    |
 | Hard       | 0     | 0       | 0     |
 
 *Updated: October 2025*
