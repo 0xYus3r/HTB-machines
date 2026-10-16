@@ -90,7 +90,7 @@ $ bloodhound-python -d administrator.htb -c all -u Olivia -p ichliebedich -ns 10
 
 After importing the collected data into BloodHound, I analyzed the privilege relationships and discovered that `olivia` possessed `GenericAll` privilege over the `michael` user account. 
 
-![](1.png)
+![](HTB-machines/Medium/Windows/Administrator/1.png)
 
 This privilege is extremely powerful, as it grants complete control over the target object, including the ability to modify the user's password.
 
@@ -118,7 +118,7 @@ The command confirmed successful authentication, establishing that `michael`'s a
 
 Upon analyzing `michael`'s privileges in BloodHound, I discovered that `michael` possessed `ForceChangePassword` privilege over the `benjamin` user account.
 
-![](2.png)
+![](HTB-machines/Medium/Windows/Administrator/2.png)
 
 `ForceChangePassword` is another dangerous privilege that permits resetting a user's password without knowing the current one. Following the same approach as before, I reset `benjamin`'s password:
 
@@ -185,11 +185,11 @@ John the Ripper successfully cracked the master passphrase: `tekieromucho`.
 
 With the master passphrase obtained, I opened the PasswordSafe database using the GUI application and entered the cracked passphrase. The database contained stored credentials for three users: `emily`, `emma` and `alexander`. 
 
-![](3.png)
+![](HTB-machines/Medium/Windows/Administrator/3.png)
 
 Among these credentials, the `emily` user account was particularly valuable because, as discovered during the BloodHound analysis, `emily` was a member of the Remote Management Users group, which grants access to the Domain Controller via WinRM. 
 
-![](4.png)
+![](HTB-machines/Medium/Windows/Administrator/4.png)
 
 I extracted Emily's credentials from the password manager: `emily:UXLCI5iETUsIBoFVTj8yQFKoHjXmb`.
 
@@ -215,7 +215,7 @@ Upon successful authentication, I navigated to `emily`'s Desktop directory and r
 
 Upon gaining access to the Domain Controller as the `emily` user, I continued enumerating the system to identify further privilege escalation vectors. During the BloodHound analysis, I had observed that `emily` possessed `GenericWrite` privilege over the `ethan` user account. 
 
-![](5.png)
+![](HTB-machines/Medium/Windows/Administrator/5.png)
 
 `GenericWrite` permits modification of certain attributes of the target object, including the ability to add Service Principal Names (SPNs) to a user account. The `ethan` account appeared to be a service account with significant privileges, and the ability to modify his SPN presented an opportunity to perform a Kerberoasting attack. Kerberoasting is an attack technique that exploits the ability to add SPNs to user accounts. Once an SPN is added, the attacker can request a Kerberos TGS (Ticket Granting Service) ticket for that SPN. The TGS ticket is encrypted with the user's NTLM hash, and if the password is weak, the hash can be cracked offline. I leveraged `emily`'s `GenericWrite` privilege over `ethan` by using the `targetedKerberoast.py` tool, which automates the entire process:
 
@@ -250,7 +250,7 @@ John successfully cracked the hash, revealing Ethan's password: `limpbizkit`.
 
 Upon obtaining `ethan`'s credentials, I returned to the BloodHound analysis to examine `ethan`'s privilege level. The analysis revealed that `ethan` possessed the `GetChanges` and `GetChangesAll` privileges over the domain object. 
 
-![](6.png)
+![](HTB-machines/Medium/Windows/Administrator/6.png)
 
 These privileges are extremely dangerous, as they permit an attacker to perform a DCSync attack by impersonate a Domain Controller and request a complete replication of the Active Directory database, including the NTDS.dit file containing all user password hashes.
 

@@ -273,7 +273,7 @@ The user flag was successfully retrieved from john's Desktop directory:
 
 Following the acquisition of user-level access through `john`'s account, the focus shifted to privilege escalation toward domain administrator. The `john` user possessed the `GenericAll` permission on the `ADCS` organizational unit (OU), which contained certificate service configurations. 
 
-![](7.png)
+![](HTB-machines/Medium/Windows/TombWatcher/7.png)
 
 Initial enumeration of the `ADCS` container revealed it was empty of objects. The `certipy-ad` tool was used to perform a comprehensive enumeration of the Active Directory Certificate Services infrastructure:
 
