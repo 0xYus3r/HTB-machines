@@ -19,7 +19,7 @@
 </tr>
 <tr>
 <td><strong>Release Date</strong></td>
-<td>February 2019</td>
+<td>July 2019</td>
 </tr>
 <tr>
 <td><strong>Difficulty</strong></td>
