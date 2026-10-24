@@ -42,4 +42,4 @@ Each writeup follows a standard structure:
 ---
 
 *Author: [@0xYus3r](https://github.com/0xYus3r)*  
-*Last Updated: October 2025*  
+*Last Updated: October 2026*  
