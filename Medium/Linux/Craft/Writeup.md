@@ -73,11 +73,11 @@ The presence of an SSL-enabled web server suggested that further web application
 
 I navigated to the web server on port 443 and reviewed the landing page. 
 
-![](1.png)
+![](HTB-machines/Medium/Linux/Craft/1.png)
 
 Upon exploring the website's navigation, I noticed a link labeled "API" that redirected to a different virtual host, `gogs.craft.htb`. 
 
-![](2.png)
+![](HTB-machines/Medium/Linux/Craft/2.png)
 
 This virtual host hosted a Gogs instance, a self-hosted Git service, containing a repository with several Python API scripts.
 
@@ -85,7 +85,7 @@ This virtual host hosted a Gogs instance, a self-hosted Git service, containing 
 
 While browsing the repository, I examined the commit history of `test.py`, a script used for authentication and for adding new "brew" entries through the API. Reviewing previous commits revealed that a developer had accidentally committed hardcoded credentials that were later removed in a subsequent commit, but remained visible in the Git history. 
 
-![](3.png)
+![](HTB-machines/Medium/Linux/Craft/3.png)
 
 These credentials found were `dinesh:4aUh0A8PbVJxgd`.
 
@@ -208,7 +208,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 I recalled that the Gogs repository also contained a script named `dbtest.py` within the `craft_api` directory, apparently used to test connectivity to the MySQL database using the PyMySQL library. 
 
-![](4.png)
+![](HTB-machines/Medium/Linux/Craft/4.png)
 
 Using the credentials recovered from `settings.py`, I crafted a one-line Python command to connect to the database and confirm the currently selected database:
 
@@ -235,11 +235,11 @@ Finally, I dumped the entire contents of the `user` table, which revealed plaint
 
 Among the harvested credentials, `gilfoyle:ZEU3N8WNM2rh4T` allowed me to authenticate to the Gogs web interface. The gilfoyle account had access to a second, private repository containing sensitive information, including a directory holding SSH keys. 
 
-![](5.png)
+![](HTB-machines/Medium/Linux/Craft/5.png)
 
 Inside this directory, the repository exposed an SSH private key in plaintext.
 
-![](6.png)
+![](HTB-machines/Medium/Linux/Craft/6.png)
 
 I saved this private key in a local file on my attacking machine named `id_rsa`
 
