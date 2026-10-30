@@ -30,7 +30,7 @@ Each writeup follows a standard structure:
 | Medium     | 1     | 5       | 6    |
 | Hard       | 0     | 0       | 0     |
 
-*Updated: October 2025*
+*Updated: October 2026*
 
 ## ⚠️ Disclaimer
 
